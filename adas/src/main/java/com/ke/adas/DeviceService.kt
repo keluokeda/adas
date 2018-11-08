@@ -10,6 +10,7 @@ import interf.OnScanDeviceLisetener
 import interf.Oninit
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+
 @Suppress("unused")
 class DeviceService(
     private val logger: Logger
@@ -26,11 +27,13 @@ class DeviceService(
         return Observable.create {
             deviceHelper.initSDK(context.applicationContext, appKey, object : Oninit {
                 override fun onSuccess() {
+                    logger.loggerMessage("初始化成功")
                     it.onNext(true)
                     it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
+                    logger.loggerMessage("初始化失败")
                     it.onNext(false)
                     it.onComplete()
                 }
