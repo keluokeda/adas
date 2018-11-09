@@ -1,7 +1,6 @@
 package com.ke.adas
 
 import android.content.Context
-import android.support.v4.util.Pair
 import bean.BLEDevice
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
@@ -168,7 +167,7 @@ class DeviceService(
 
 
     /**
-     * 开始设备实况模式
+     * 打开设备实况模式
      */
     fun openDeviceRealViewMode(): Observable<kotlin.Pair<String, String>> {
         return Observable.create<kotlin.Pair<String, String>> {
@@ -177,8 +176,15 @@ class DeviceService(
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
-                deviceHelper.closeDeviceRealViewMode()
+                //                deviceHelper.closeDeviceRealViewMode()
             }
+    }
+
+    /**
+     * 关闭实况模式
+     */
+    fun closeDeviceRealViewMode() {
+        deviceHelper.closeDeviceRealViewMode()
     }
 
 
