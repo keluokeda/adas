@@ -1,15 +1,18 @@
 package com.ke.adas
 
 import android.content.Context
+import android.support.v4.util.Pair
 import bean.BLEDevice
+import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
 import com.ke.adas.entity.Device
+import com.ke.adas.entity.RealViewEntity
 import com.ke.adas.exception.DeviceException
-import interf.BleLoginListener
-import interf.OnScanDeviceLisetener
-import interf.Oninit
+import interf.*
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 @Suppress("unused")
 class DeviceService(
@@ -125,4 +128,113 @@ class DeviceService(
     fun disconnectDevice() {
         deviceHelper.disconnectDevice()
     }
+
+
+    private fun getRealViewCallback(e: ObservableEmitter<RealViewEntity>): RealViewCallback {
+        return object : RealViewCallback {
+            override fun onGetPixData(bytes: ByteArray, i: Int) {
+                e.onNext(RealViewEntity(bytes, i))
+            }
+
+            override fun onGetADASRecInfo(arrayList: ArrayList<*>) {
+                val list = arrayList.map {
+                    it as DrawShape
+                }
+
+                e.onNext(RealViewEntity(list))
+            }
+
+            override fun onGetSideRecInfo(arrayList: ArrayList<*>) {
+
+            }
+
+            override fun onGetDSMAlarmInfo(map: Map<*, *>) {
+
+            }
+
+            override fun onGetSensorData(x: Float, y: Float, z: Float) {
+                e.onNext(RealViewEntity(x, y, z))
+            }
+
+            override fun onGetSpeedData(s: String) {
+                e.onNext(RealViewEntity(s))
+            }
+
+            override fun onErro(i: Int) {
+                e.onError(DeviceException(i))
+            }
+        }
+    }
+
+
+    /**
+     * 开始设备实况模式
+     */
+    fun openDeviceRealViewMode(): Observable<kotlin.Pair<String, String>> {
+        return Observable.create<kotlin.Pair<String, String>> {
+            deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
+        }
+            .subscribeOn(deviceScheduler)
+            .unsubscribeOn(deviceScheduler)
+            .doOnDispose {
+                deviceHelper.closeDeviceRealViewMode()
+            }
+    }
+
+
+    /**
+     * 初始化实况模式
+     */
+    fun initRealView(): Observable<RealViewEntity> {
+//       deviceHelper.initRealView()
+        return Observable.create<RealViewEntity> {
+            getRealViewCallback(it)
+        }
+            .subscribeOn(deviceScheduler)
+            .unsubscribeOn(deviceScheduler)
+            .doOnDispose {
+                deviceHelper.initRealView(null)
+            }
+    }
+
+    /**
+     * 开启实况模式
+     */
+    fun startRealView(): Observable<Boolean> {
+
+        return Observable.create<Boolean> {
+            deviceHelper.startRealView()
+            it.onNext(true)
+            it.onComplete()
+        }
+            .subscribeOn(deviceScheduler)
+            .unsubscribeOn(deviceScheduler)
+            .doOnDispose {
+                deviceHelper.stopRealView()
+            }
+
+    }
+
+
+    private fun getOnWifiOpenListener(e: ObservableEmitter<kotlin.Pair<String, String>>): OnWifiOpenListener {
+        return object : OnWifiOpenListener {
+            override fun onSuccess(s: String, s1: String) {
+                logger.loggerMessage("get wifi account = $s password = $s1")
+                e.onNext(s to s1)
+            }
+
+            override fun onFail(i: Int) {
+                //onNext不允许为null
+                logger.loggerMessage("open wifi error = $i")
+                e.onError(DeviceException(i))
+            }
+
+            override fun onGetSanResult(s: String) {
+
+                logger.loggerMessage("scan result $s")
+
+            }
+        }
+    }
+
 }
