@@ -195,7 +195,9 @@ class DeviceService(
     fun initRealView(): Observable<RealViewEntity> {
 //       deviceHelper.initRealView()
         return Observable.create<RealViewEntity> {
-            getRealViewCallback(it)
+            deviceHelper.initRealView(
+                getRealViewCallback(it)
+            )
         }
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
