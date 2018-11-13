@@ -4,6 +4,7 @@ package com.ke.adas.entity;
 import bean.DrawShape;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RealViewEntity {
@@ -56,5 +57,20 @@ public class RealViewEntity {
     public RealViewEntity(int errorCode) {
         this.errorCode = errorCode;
         type = TYPE_ERROR;
+    }
+
+    @Override
+    public String toString() {
+        return "RealViewEntity{" +
+                "mBytes=" + Arrays.toString(mBytes) +
+                ", size=" + size +
+                ", mDrawShapes=" + mDrawShapes +
+                ", x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                ", speed='" + speed + '\'' +
+                ", errorCode=" + errorCode +
+                ", type=" + type +
+                '}';
     }
 }

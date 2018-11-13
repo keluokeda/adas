@@ -18,7 +18,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     protected abstract fun handleError(throwable: Throwable)
 
 
-    abstract fun getDeviceService(): DeviceService
+    protected abstract fun getDeviceService(): DeviceService
+
+    protected abstract fun loggerMessage(message: String)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +47,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     RealViewEntity.TYPE_SPEED -> {
                     }
                     RealViewEntity.TYPE_ERROR -> {
+                        loggerMessage("发生了错误 $realViewEntity")
                     }
                     else -> {
                     }
@@ -61,6 +64,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         getDeviceService().startRealView()
             .subscribe({
 
+                loggerMessage(
+                    "开启实况模式结果 $it"
+                )
             }, {
                 handleError(it)
 //                setResult(Activity.RESULT_CANCELED)
