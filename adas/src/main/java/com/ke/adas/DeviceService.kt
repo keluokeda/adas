@@ -80,6 +80,7 @@ class DeviceService(
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
+                logger.loggerMessage("停止扫描设备")
                 deviceHelper.stopScanDevice()
             }
 
@@ -199,6 +200,7 @@ class DeviceService(
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
+                //                logger.loggerMessage("关闭实况模式")
                 deviceHelper.initRealView(null)
             }
     }
@@ -209,6 +211,7 @@ class DeviceService(
     fun startRealView(): Observable<Boolean> {
 
         return Observable.create<Boolean> {
+            logger.loggerMessage("开始实况模式")
             deviceHelper.startRealView()
             it.onNext(true)
             it.onComplete()
@@ -216,6 +219,7 @@ class DeviceService(
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
+                logger.loggerMessage("关闭实况模式")
                 deviceHelper.stopRealView()
             }
 
