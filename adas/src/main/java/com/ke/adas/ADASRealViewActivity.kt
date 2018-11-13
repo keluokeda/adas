@@ -77,6 +77,12 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        compositeDisposable.dispose()
+    }
+
 
     private fun requestFullScreen() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)

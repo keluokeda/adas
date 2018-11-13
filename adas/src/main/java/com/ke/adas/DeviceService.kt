@@ -202,7 +202,7 @@ class DeviceService(
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
-                //                logger.loggerMessage("关闭实况模式")
+                logger.loggerMessage("关闭实况模式")
                 deviceHelper.initRealView(null)
             }
     }
