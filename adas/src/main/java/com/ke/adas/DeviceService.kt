@@ -172,12 +172,14 @@ class DeviceService(
      */
     fun openDeviceRealViewMode(): Observable<kotlin.Pair<String, String>> {
         return Observable.create<kotlin.Pair<String, String>> {
+            logger.loggerMessage("打开设备实况模式")
             deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
         }
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
-                //                deviceHelper.closeDeviceRealViewMode()
+                logger.loggerMessage("关闭设备实况模式")
+                deviceHelper.closeDeviceRealViewMode()
             }
     }
 

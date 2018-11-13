@@ -1,7 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+        >
 
 
     <com.ke.adas.widget.VideoSurfaceView
@@ -13,17 +14,85 @@
             android:id="@+id/adas_surface_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-    />
+            />
 
     <TextView
             android:id="@+id/tv_speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_alignParentEnd="true"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:textColor="#ff0000"
-    />
+            android:layout_gravity="top|end"
+            />
+
+    <LinearLayout
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_white_radius_4dp"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:paddingStart="48dp"
+            android:paddingEnd="48dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:id="@+id/layout_connect"
+            >
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:text="实景请连接设备wifi"
+                android:gravity="center"
+                />
+
+        <TextView
+                android:id="@+id/wifi_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="ADAS"
+                android:gravity="center"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:padding="8dp"
+                />
+
+        <TextView
+                android:id="@+id/wifi_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="123456"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:gravity="center"
+                android:padding="8dp"
+                />
+
+        <Button
+                android:id="@+id/connect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_primary_radius"
+                android:text="连接设备"
+
+                android:textColor="#fff"
+                />
+    </LinearLayout>
 
 
-</RelativeLayout>
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffffff"
+            android:id="@+id/progress_container"
+            android:visibility="gone"
+            >
+
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+    </FrameLayout>
+
+
+</FrameLayout>
