@@ -216,6 +216,7 @@ class DeviceService(
             it.onNext(true)
             it.onComplete()
         }
+
             .subscribeOn(deviceScheduler)
             .unsubscribeOn(deviceScheduler)
             .doOnDispose {
