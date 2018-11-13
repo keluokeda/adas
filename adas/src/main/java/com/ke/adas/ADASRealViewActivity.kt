@@ -36,7 +36,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         //初始化
         getDeviceService().initRealView().observeOn(Schedulers.newThread())
             .subscribe({ realViewEntity ->
-                loggerMessage(realViewEntity.toString())
+//                loggerMessage(realViewEntity.toString())
                 when (realViewEntity.type) {
                     RealViewEntity.TYPE_FRAME -> {
 //                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
