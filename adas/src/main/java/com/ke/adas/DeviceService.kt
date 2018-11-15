@@ -212,7 +212,7 @@ class DeviceService(
             logger.loggerMessage("开始实况模式")
             deviceHelper.startRealView()
             it.onNext(true)
-            it.onComplete()
+//            it.onComplete()
         }
 
             .doOnDispose {
