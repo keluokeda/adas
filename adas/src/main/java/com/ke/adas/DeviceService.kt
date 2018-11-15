@@ -193,9 +193,13 @@ class DeviceService(
     fun initRealView(): Observable<RealViewEntity> {
 //       deviceHelper.initRealView()
         return Observable.create<RealViewEntity> {
+            logger.loggerMessage("初始化实况模式")
             deviceHelper.initRealView(
                 getRealViewCallback(it)
             )
+        }.doOnDispose {
+            logger.loggerMessage("注销实况模式")
+            deviceHelper.initRealView(null)
         }
     }
 
