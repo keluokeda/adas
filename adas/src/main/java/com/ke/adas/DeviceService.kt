@@ -21,7 +21,6 @@ class DeviceService(
 
     private val deviceHelper = DeviceHelper()
 
-    private val deviceScheduler = Schedulers.computation()
     /**
      * 初始化
      */
@@ -77,8 +76,6 @@ class DeviceService(
             })
         }
             .distinct { it.address }
-            .subscribeOn(deviceScheduler)
-            .unsubscribeOn(deviceScheduler)
             .doOnDispose {
                 logger.loggerMessage("停止扫描设备")
                 deviceHelper.stopScanDevice()
@@ -175,8 +172,7 @@ class DeviceService(
             logger.loggerMessage("打开设备实况模式")
             deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
         }
-            .subscribeOn(deviceScheduler)
-            .unsubscribeOn(deviceScheduler)
+
             .doOnDispose {
                 logger.loggerMessage("关闭设备实况模式")
                 deviceHelper.closeDeviceRealViewMode()
@@ -201,8 +197,7 @@ class DeviceService(
                 getRealViewCallback(it)
             )
         }
-            .subscribeOn(deviceScheduler)
-            .unsubscribeOn(deviceScheduler)
+
             .doOnDispose {
                 logger.loggerMessage("关闭实况模式")
                 deviceHelper.initRealView(null)
@@ -221,8 +216,6 @@ class DeviceService(
             it.onComplete()
         }
 
-            .subscribeOn(deviceScheduler)
-            .unsubscribeOn(deviceScheduler)
             .doOnDispose {
                 logger.loggerMessage("关闭实况模式")
                 deviceHelper.stopRealView()
