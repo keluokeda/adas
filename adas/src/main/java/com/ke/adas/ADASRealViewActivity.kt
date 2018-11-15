@@ -81,7 +81,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 progress_container.visibility = View.GONE
                 layout_connect.visibility = View.VISIBLE
                 wifi_name.text = it.first
-                wifi_name.text = it.second
+                wifi_password.text = it.second
                 this.wifiName = it.first
 
             }, {
