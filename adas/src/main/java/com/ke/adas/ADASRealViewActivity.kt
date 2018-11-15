@@ -48,19 +48,23 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
 
-        getDeviceService().openDeviceRealViewMode().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            {
-                progress_container.visibility = View.GONE
-                layout_connect.visibility = View.VISIBLE
-                wifi_name.text = it.first
-                wifi_password.text = it.second
-                this.wifiName = it.first
+        getDeviceService()
+            .openDeviceRealViewMode()
+            .subscribeOn(Schedulers.io())
+            .unsubscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(
+                {
+                    progress_container.visibility = View.GONE
+                    layout_connect.visibility = View.VISIBLE
+                    wifi_name.text = it.first
+                    wifi_password.text = it.second
+                    this.wifiName = it.first
 
-            }, {
-                handleError(it)
-                finish()
-            }
-        ).addTo(compositeDisposable)
+                }, {
+                    handleError(it)
+                    finish()
+                }
+            ).addTo(compositeDisposable)
 
         connect.setOnClickListener {
             if (TextUtils.equals(wifiName, getCurrentWifiName())) {
@@ -72,12 +76,16 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun initRealView() {
-        getDeviceService().initRealView().observeOn(Schedulers.newThread())
+        getDeviceService()
+            .initRealView()
+            .subscribeOn(Schedulers.io())
+            .unsubscribeOn(Schedulers.io())
+            .observeOn(Schedulers.newThread())
             .subscribe({ realViewEntity ->
                 //                loggerMessage(realViewEntity.toString())
                 when (realViewEntity.type) {
                     RealViewEntity.TYPE_FRAME -> {
-    //                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
+                        //                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
                         video_surface_view.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
@@ -108,6 +116,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         progress_container.visibility = View.VISIBLE
 
         getDeviceService().startRealView()
+            .subscribeOn(Schedulers.io())
+            .unsubscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 layout_connect.visibility = View.GONE
                 progress_container.visibility = View.GONE
