@@ -45,13 +45,39 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         progress_container.visibility = View.VISIBLE
 
 
-        //初始化
+
+
+
+        getDeviceService().openDeviceRealViewMode().observeOn(AndroidSchedulers.mainThread()).subscribe(
+            {
+                progress_container.visibility = View.GONE
+                layout_connect.visibility = View.VISIBLE
+                wifi_name.text = it.first
+                wifi_password.text = it.second
+                this.wifiName = it.first
+
+            }, {
+                handleError(it)
+                finish()
+            }
+        ).addTo(compositeDisposable)
+
+        connect.setOnClickListener {
+            if (TextUtils.equals(wifiName, getCurrentWifiName())) {
+                initRealView()
+                startRealView()
+            }
+        }
+
+    }
+
+    private fun initRealView() {
         getDeviceService().initRealView().observeOn(Schedulers.newThread())
             .subscribe({ realViewEntity ->
                 //                loggerMessage(realViewEntity.toString())
                 when (realViewEntity.type) {
                     RealViewEntity.TYPE_FRAME -> {
-//                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
+    //                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
                         video_surface_view.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
@@ -72,30 +98,6 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 setResult(RESULT_CANCELED)
                 finish()
             }).addTo(compositeDisposable)
-
-//        startRealView()
-
-
-        getDeviceService().openDeviceRealViewMode().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            {
-                progress_container.visibility = View.GONE
-                layout_connect.visibility = View.VISIBLE
-                wifi_name.text = it.first
-                wifi_password.text = it.second
-                this.wifiName = it.first
-
-            }, {
-                handleError(it)
-                finish()
-            }
-        ).addTo(compositeDisposable)
-
-        connect.setOnClickListener {
-            if (TextUtils.equals(wifiName, getCurrentWifiName())) {
-                startRealView()
-            }
-        }
-
     }
 
     /**
