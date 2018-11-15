@@ -10,16 +10,16 @@ import android.view.Window
 import android.view.WindowManager
 import com.ke.adas.entity.RealViewEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
 
 abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
-    private val compositeDisposable = CompositeDisposable()
-
+    private var d1: Disposable? = null
+    private var d2: Disposable? = null
+    private var d3: Disposable? = null
 
     protected abstract fun handleError(throwable: Throwable)
 
@@ -48,7 +48,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
 
-        getDeviceService()
+        d1 = getDeviceService()
             .openDeviceRealViewMode()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
@@ -64,7 +64,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     handleError(it)
                     finish()
                 }
-            ).addTo(compositeDisposable)
+            )
 
         connect.setOnClickListener {
             if (TextUtils.equals(wifiName, getCurrentWifiName())) {
@@ -76,7 +76,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun initRealView() {
-        getDeviceService()
+        d3 = getDeviceService()
             .initRealView()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
@@ -105,7 +105,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 handleError(it)
                 setResult(RESULT_CANCELED)
                 finish()
-            }).addTo(compositeDisposable)
+            })
     }
 
     /**
@@ -115,7 +115,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         layout_connect.visibility = View.GONE
         progress_container.visibility = View.VISIBLE
 
-        getDeviceService().startRealView()
+        d2 = getDeviceService().startRealView()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -130,13 +130,14 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 //                setResult(Activity.RESULT_CANCELED)
                 finish()
             })
-            .addTo(compositeDisposable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        compositeDisposable.dispose()
+        d1?.dispose()
+        d2?.dispose()
+        d3?.dispose()
     }
 
 

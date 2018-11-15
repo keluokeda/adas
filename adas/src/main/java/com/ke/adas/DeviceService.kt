@@ -165,7 +165,7 @@ class DeviceService(
 
 
     /**
-     * 打开设备实况模式
+     * 打开设备实况模式 1
      */
     fun openDeviceRealViewMode(): Observable<kotlin.Pair<String, String>> {
         return Observable.create<kotlin.Pair<String, String>> {
@@ -188,7 +188,7 @@ class DeviceService(
 
 
     /**
-     * 初始化实况模式
+     * 初始化实况模式 3
      */
     fun initRealView(): Observable<RealViewEntity> {
 //       deviceHelper.initRealView()
@@ -204,7 +204,7 @@ class DeviceService(
     }
 
     /**
-     * 开启实况模式
+     * 开启实况模式 2
      */
     fun startRealView(): Observable<Boolean> {
 
