@@ -197,11 +197,6 @@ class DeviceService(
                 getRealViewCallback(it)
             )
         }
-
-            .doOnDispose {
-                logger.loggerMessage("关闭实况模式")
-                deviceHelper.initRealView(null)
-            }
     }
 
     /**
