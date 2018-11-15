@@ -117,7 +117,7 @@ class DeviceService(
 
             })
         }
-            .subscribeOn(deviceScheduler)
+
 
     }
 
