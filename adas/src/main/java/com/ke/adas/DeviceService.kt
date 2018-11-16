@@ -212,6 +212,7 @@ class DeviceService(
             logger.loggerMessage("开始实况模式")
             deviceHelper.startRealView()
             it.onNext(true)
+            //调用了onComplete 就不会走doOnDispose
 //            it.onComplete()
         }
 

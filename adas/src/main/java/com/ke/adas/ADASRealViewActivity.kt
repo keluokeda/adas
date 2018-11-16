@@ -1,10 +1,14 @@
 package com.ke.adas
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
-import android.text.TextUtils
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -21,6 +25,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private var d2: Disposable? = null
     private var d3: Disposable? = null
 
+
     protected abstract fun handleError(throwable: Throwable)
 
 
@@ -30,6 +35,23 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
     private var wifiName: String? = null
+
+
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            val netWorkInfo: NetworkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)
+
+            loggerMessage("wifi状态发生变化")
+
+            loggerMessage("网络连接状态 ${netWorkInfo.detailedState.name}")
+
+            loggerMessage("网络信息 $netWorkInfo")
+
+
+        }
+
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,11 +89,17 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             )
 
         connect.setOnClickListener {
-            if (TextUtils.equals(wifiName, getCurrentWifiName())) {
-                initRealView()
-                startRealView()
-            }
+
+            //跳转到wifi设置界面
+            startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
         }
+
+        val intentFilter = IntentFilter()
+            .apply {
+                addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+            }
+
+        registerReceiver(receiver, intentFilter)
 
     }
 
@@ -138,6 +166,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         d1?.dispose()
         d2?.dispose()
         d3?.dispose()
+
+        unregisterReceiver(receiver)
     }
 
 
@@ -152,7 +182,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
 
-    protected fun getCurrentWifiName(): String {
+    private fun getCurrentWifiName(): String {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         val wifiInfo = wifiManager.connectionInfo
