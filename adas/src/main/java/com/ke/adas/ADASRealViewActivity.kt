@@ -9,12 +9,17 @@ import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
+import android.text.TextUtils
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import com.ke.adas.entity.RealViewEntity
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
 
@@ -24,6 +29,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private var d1: Disposable? = null
     private var d2: Disposable? = null
     private var d3: Disposable? = null
+
+    private var d4: Disposable? = null
 
 
     protected abstract fun handleError(throwable: Throwable)
@@ -35,6 +42,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
     private var wifiName: String? = null
+
+    private lateinit var emitter: SingleEmitter<Boolean>
 
 
     private val receiver = object : BroadcastReceiver() {
@@ -48,6 +57,16 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
             loggerMessage("网络信息 $netWorkInfo")
 
+            if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && TextUtils.equals(
+                    wifiName,
+                    netWorkInfo.extraInfo
+                )
+            ) {
+                //连上设备的wifi
+                //这里可能会走两次
+                emitter.onSuccess(true)
+
+            }
 
         }
 
@@ -67,8 +86,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         progress_container.visibility = View.VISIBLE
 
 
-
-
+        d4 = Single.create<Boolean> {
+            emitter = it
+        }
+            .subscribe(Consumer {
+                initRealView()
+                startRealView()
+            })
 
         d1 = getDeviceService()
             .openDeviceRealViewMode()
@@ -166,6 +190,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         d1?.dispose()
         d2?.dispose()
         d3?.dispose()
+        d4?.dispose()
 
         unregisterReceiver(receiver)
     }
