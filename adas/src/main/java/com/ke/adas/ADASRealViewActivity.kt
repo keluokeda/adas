@@ -59,7 +59,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
             if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && TextUtils.equals(
                     wifiName,
-                    netWorkInfo.extraInfo
+                    netWorkInfo.extraInfo.replace("\"", "")
                 )
             ) {
                 //连上设备的wifi
