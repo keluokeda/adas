@@ -134,6 +134,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private fun hideNavigation() {
         val params = window.attributes
         params.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE
+        window.attributes = params
 
     }
 
@@ -177,7 +178,6 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private fun startRealView() {
         layout_connect.visibility = View.GONE
         progress_container.visibility = View.VISIBLE
-        divider.visibility = View.VISIBLE
 
         d2 = getDeviceService().startRealView()
             .subscribeOn(Schedulers.io())
@@ -186,6 +186,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .subscribe({
                 layout_connect.visibility = View.GONE
                 progress_container.visibility = View.GONE
+                divider.visibility = View.VISIBLE
+
                 loggerMessage(
                     "开启实况模式结果 $it"
                 )
