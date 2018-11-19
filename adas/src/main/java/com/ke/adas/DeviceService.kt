@@ -10,7 +10,6 @@ import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 @Suppress("unused")
@@ -50,6 +49,65 @@ class DeviceService(
      */
     fun isConnectedDevice(): Boolean {
         return deviceHelper.isConnectedDevice
+    }
+
+    /**
+     * 设置声音提示方式
+     */
+    fun setVoiceType(voiceType: VoiceType): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setADASVoice(
+                voiceType.type,
+                voiceType.type,
+                voiceType.type,
+                voiceType.type,
+                object : SetDeviceInfoCallback {
+                    override fun onSuccess() {
+                        it.onNext(true)
+                    }
+
+                    override fun onFail(p0: Int) {
+                        it.onError(DeviceException(p0))
+                    }
+
+                })
+        }
+    }
+
+
+    /**
+     * 设置音量大小
+     */
+    fun setDeviceVoice(deviceVoice: DeviceVoice): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setVoice(deviceVoice.value, object : SetDeviceInfoCallback {
+                override fun onSuccess() {
+                    it.onNext(true)
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    /**
+     * 获取音量大小
+     */
+    fun getDeviceVoice(): Observable<DeviceVoice> {
+        return Observable.create<DeviceVoice> {
+            deviceHelper.getVoice(object : onGetVoiceCallback {
+                override fun onSuccess(p0: String?) {
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
     }
 
     /**

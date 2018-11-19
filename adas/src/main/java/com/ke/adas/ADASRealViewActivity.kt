@@ -19,7 +19,6 @@ import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
 
@@ -118,12 +117,23 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
         }
 
+        back.setOnClickListener {
+            finish()
+        }
+
         val intentFilter = IntentFilter()
             .apply {
                 addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
             }
 
         registerReceiver(receiver, intentFilter)
+
+        hideNavigation()
+    }
+
+    private fun hideNavigation() {
+        val params = window.attributes
+        params.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE
 
     }
 
@@ -144,6 +154,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
                     RealViewEntity.TYPE_SPEED -> {
+                        tv_speed.text = realViewEntity.speed
                     }
                     RealViewEntity.TYPE_ERROR -> {
                         loggerMessage("发生了错误 $realViewEntity")
@@ -166,6 +177,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private fun startRealView() {
         layout_connect.visibility = View.GONE
         progress_container.visibility = View.VISIBLE
+        divider.visibility = View.VISIBLE
 
         d2 = getDeviceService().startRealView()
             .subscribeOn(Schedulers.io())
@@ -179,7 +191,6 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 )
             }, {
                 handleError(it)
-                //                setResult(Activity.RESULT_CANCELED)
                 finish()
             })
     }
@@ -207,11 +218,4 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
 
-    private fun getCurrentWifiName(): String {
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-        val wifiInfo = wifiManager.connectionInfo
-
-        return wifiInfo.ssid.replace("\"", "")
-    }
 }
