@@ -20,7 +20,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
+import java.util.concurrent.TimeUnit
 
 abstract class ADASRealViewActivity : AppCompatActivity() {
 
@@ -28,8 +30,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private var d1: Disposable? = null
     private var d2: Disposable? = null
     private var d3: Disposable? = null
-
     private var d4: Disposable? = null
+    private var d5: Disposable? = null
 
 
     protected abstract fun handleError(throwable: Throwable)
@@ -38,6 +40,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     protected abstract fun getDeviceService(): DeviceService
 
     protected abstract fun loggerMessage(message: String)
+
+    private val speedSubject = PublishSubject.create<String>()
 
 
     private var wifiName: String? = null
@@ -111,6 +115,11 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 }
             )
 
+
+        d5 = speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
+            tv_speed.text = it
+        }
+
         connect.setOnClickListener {
 
             //跳转到wifi设置界面
@@ -155,7 +164,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
                     RealViewEntity.TYPE_SPEED -> {
-                        tv_speed.text = realViewEntity.speed
+                        //需要在主线程更新
+//                        tv_speed.text = realViewEntity.speed
+                        speedSubject.onNext(realViewEntity.speed)
                     }
                     RealViewEntity.TYPE_ERROR -> {
                         loggerMessage("发生了错误 $realViewEntity")
@@ -209,6 +220,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         d2?.dispose()
         d3?.dispose()
         d4?.dispose()
+        d5?.dispose()
 
         unregisterReceiver(receiver)
     }
