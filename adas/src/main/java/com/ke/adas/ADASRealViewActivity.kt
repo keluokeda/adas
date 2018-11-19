@@ -172,6 +172,11 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             })
     }
 
+    override fun onBackPressed() {
+        loggerMessage("点了返回按钮")
+        super.onBackPressed()
+    }
+
     /**
      * 开启实况模式
      */
