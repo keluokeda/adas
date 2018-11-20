@@ -19,6 +19,7 @@ import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
@@ -32,6 +33,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private var d3: Disposable? = null
     private var d4: Disposable? = null
     private var d5: Disposable? = null
+    private var d6: Disposable? = null
 
 
     protected abstract fun handleError(throwable: Throwable)
@@ -200,8 +202,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .unsubscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
+                //开启实况模式成功后 取消连接wifi提示框
                 layout_connect.visibility = View.GONE
-                progress_container.visibility = View.GONE
+                progress_container.visibility = View.VISIBLE
                 divider.visibility = View.VISIBLE
 
                 loggerMessage(
@@ -211,6 +214,14 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 handleError(it)
                 finish()
             })
+
+        d6 = video_surface_view.initSubject.subscribe({
+            //收到第一帧后 隐藏进度条
+            progress_container.visibility = View.GONE
+            divider.visibility = View.GONE
+        }, {
+            handleError(it)
+        })
     }
 
     override fun onDestroy() {
@@ -221,6 +232,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         d3?.dispose()
         d4?.dispose()
         d5?.dispose()
+        d6?.dispose()
 
         unregisterReceiver(receiver)
     }

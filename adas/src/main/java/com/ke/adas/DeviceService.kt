@@ -243,7 +243,6 @@ class DeviceService(
      * 初始化实况模式 3
      */
     fun initRealView(): Observable<RealViewEntity> {
-//       deviceHelper.initRealView()
         return Observable.create<RealViewEntity> {
             logger.loggerMessage("初始化实况模式")
             deviceHelper.initRealView(

@@ -12,6 +12,7 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,6 +26,10 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     SurfaceHolder mSurfaceHolder;
     MediaCodec mMediaCodec;
     int mCount = 0;
+
+    public final PublishSubject<Boolean> initSubject = PublishSubject.create();
+
+    private boolean init = false;
 
 
     // Video Constants
@@ -115,6 +120,15 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     private void onFrame(byte[] buf, int length) {
 
+        if (!init) {
+            if (!isFirstFrame(buf)) {
+                return;
+            } else {
+                init = true;
+                initSubject.onNext(true);
+            }
+        }
+
         ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
         int inputBufferIndex = mMediaCodec.dequeueInputBuffer(100);
 
@@ -136,6 +150,15 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             mMediaCodec.releaseOutputBuffer(outputBufferIndex, true);
             outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 0);
         }
+    }
+
+
+    /**
+     * 是否是第一帧
+     */
+    private boolean isFirstFrame(byte[] buffer) {
+        return (buffer[0] == 0x00 && buffer[1] == 0x00 && buffer[2] == 0x00
+                && buffer[3] == 0x01 && buffer[4] == 0x67);
     }
 
 
