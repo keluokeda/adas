@@ -3,7 +3,6 @@ package com.ke.adas.entity;
 
 import bean.DrawShape;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

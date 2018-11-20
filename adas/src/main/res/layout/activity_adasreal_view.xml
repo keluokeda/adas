@@ -109,7 +109,7 @@
             android:padding="8dp"
             android:id="@+id/back"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_clear_white_24dp"
+            android:src="@drawable/ic_arrow_back_white_24dp"
             />
 
 </FrameLayout>

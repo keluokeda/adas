@@ -5,6 +5,7 @@ import bean.BLEDevice
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
 import com.ke.adas.entity.Device
+import com.ke.adas.entity.DeviceSensitivityLevel
 import com.ke.adas.entity.RealViewEntity
 import com.ke.adas.exception.DeviceException
 import interf.*
@@ -54,61 +55,36 @@ class DeviceService(
     /**
      * 设置声音提示方式
      */
-    fun setVoiceType(voiceType: VoiceType): Observable<Boolean> {
-        return Observable.create<Boolean> {
-            deviceHelper.setADASVoice(
-                voiceType.type,
-                voiceType.type,
-                voiceType.type,
-                voiceType.type,
-                object : SetDeviceInfoCallback {
-                    override fun onSuccess() {
-                        it.onNext(true)
-                    }
-
-                    override fun onFail(p0: Int) {
-                        it.onError(DeviceException(p0))
-                    }
-
-                })
-        }
-    }
+//    fun setVoiceType(voiceType: VoiceType): Observable<Boolean> {
+//        return Observable.create<Boolean> {
+//            deviceHelper.setADASVoice(
+//                voiceType.type,
+//                voiceType.type,
+//                voiceType.type,
+//                voiceType.type,
+//                object : SetDeviceInfoCallback {
+//                    override fun onSuccess() {
+//                        it.onNext(true)
+//                    }
+//
+//                    override fun onFail(p0: Int) {
+//                        it.onError(DeviceException(p0))
+//                    }
+//
+//                })
+//        }
+//    }
 
 
     /**
      * 设置音量大小
      */
-    fun setDeviceVoice(deviceVoice: DeviceVoice): Observable<Boolean> {
+    fun setDeviceVoice(voice: Int): Observable<Boolean> {
         return Observable.create<Boolean> {
-            deviceHelper.setVoice(deviceVoice.value, object : SetDeviceInfoCallback {
-                override fun onSuccess() {
-                    it.onNext(true)
-                }
-
-                override fun onFail(p0: Int) {
-                    it.onError(DeviceException(p0))
-                }
-
-            })
+            deviceHelper.setVoice(voice, getSetDeviceInfoCallback(it))
         }
     }
 
-    /**
-     * 获取音量大小
-     */
-    fun getDeviceVoice(): Observable<DeviceVoice> {
-        return Observable.create<DeviceVoice> {
-            deviceHelper.getVoice(object : onGetVoiceCallback {
-                override fun onSuccess(p0: String?) {
-                }
-
-                override fun onFail(p0: Int) {
-                    it.onError(DeviceException(p0))
-                }
-
-            })
-        }
-    }
 
     /**
      * 扫描设备
@@ -244,6 +220,24 @@ class DeviceService(
         deviceHelper.closeDeviceRealViewMode()
     }
 
+    /**
+     * 设置设备wifi密码
+     */
+    fun setDeviceWifiPassword(password: String): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setDeviceWifiPassword(password, getSetDeviceInfoCallback(it))
+        }
+    }
+
+    /**
+     * 获取设备wifi信息
+     */
+    fun getDeviceWifiInfo(): Observable<Pair<String, String>> {
+        return Observable.create<Pair<String, String>> {
+            deviceHelper.getDeviceWifiNameAndPassword(getOnWifiOpenListener(it))
+        }
+    }
+
 
     /**
      * 初始化实况模式 3
@@ -281,6 +275,101 @@ class DeviceService(
 
     }
 
+
+    /**
+     * 设置报警灵敏度
+     */
+    fun setDeviceSensitivityLevel(deviceSensitivityLevel: DeviceSensitivityLevel): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setADASSensitivityLevel(
+                deviceSensitivityLevel.ldw,
+                deviceSensitivityLevel.fcw,
+                deviceSensitivityLevel.pcw,
+                object : SetDeviceInfoCallback {
+                    override fun onSuccess() {
+                        it.onNext(true)
+                    }
+
+                    override fun onFail(p0: Int) {
+                        it.onError(DeviceException(p0))
+                    }
+
+                })
+        }
+    }
+
+
+    /**
+     * 获取报警灵敏度
+     */
+    fun getDeviceSensitivityLevel(): Observable<DeviceSensitivityLevel> {
+
+        return Observable.create<DeviceSensitivityLevel> {
+            deviceHelper.getADASSensitivityLevel(object : GetADASInfoCallback {
+                override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    it.onNext(DeviceSensitivityLevel(p0, p1, p2))
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    /**
+     * 获取报警启动车速
+     */
+    fun getSpeedThreshold(): Observable<SpeedThreshold> {
+        return Observable.create<SpeedThreshold> {
+            deviceHelper.GetADASSpeedThreshold(object : GetADASInfoCallback {
+                override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    it.onNext(SpeedThreshold(p0, p1, p2))
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+            })
+        }
+    }
+
+    /**
+     * 设置报警启动车速
+     */
+    fun setSpeedThreshold(speedThreshold: SpeedThreshold): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setADASSpeedThreshold(
+                speedThreshold.ldw,
+                speedThreshold.fcw,
+                speedThreshold.pcw,
+                object : SetDeviceInfoCallback {
+                    override fun onSuccess() {
+                        it.onNext(true)
+                    }
+
+                    override fun onFail(p0: Int) {
+                        it.onError(DeviceException(p0))
+                    }
+
+                })
+        }
+    }
+
+
+    private fun getSetDeviceInfoCallback(e: ObservableEmitter<Boolean>): SetDeviceInfoCallback {
+        return object : SetDeviceInfoCallback {
+            override fun onSuccess() {
+                e.onNext(true)
+            }
+
+            override fun onFail(p0: Int) {
+                e.onError(DeviceException(p0))
+            }
+
+        }
+    }
 
     private fun getOnWifiOpenListener(e: ObservableEmitter<kotlin.Pair<String, String>>): OnWifiOpenListener {
         return object : OnWifiOpenListener {
