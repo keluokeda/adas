@@ -17,7 +17,7 @@ import com.ke.adas.entity.RealViewEntity
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -27,13 +27,7 @@ import java.util.concurrent.TimeUnit
 
 abstract class ADASRealViewActivity : AppCompatActivity() {
 
-
-    private var d1: Disposable? = null
-    private var d2: Disposable? = null
-    private var d3: Disposable? = null
-    private var d4: Disposable? = null
-    private var d5: Disposable? = null
-    private var d6: Disposable? = null
+    private val compositeDisposable = CompositeDisposable()
 
 
     protected abstract fun handleError(throwable: Throwable)
@@ -91,15 +85,15 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         progress_container.visibility = View.VISIBLE
 
 
-        d4 = Single.create<Boolean> {
+        Single.create<Boolean> {
             emitter = it
         }
             .subscribe(Consumer {
                 initRealView()
                 startRealView()
-            })
+            }).addTo(compositeDisposable)
 
-        d1 = getDeviceService()
+        getDeviceService()
             .openDeviceRealViewMode()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
@@ -115,12 +109,12 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     handleError(it)
                     finish()
                 }
-            )
+            ).addTo(compositeDisposable)
 
 
-        d5 = speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
+        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
             tv_speed.text = it
-        }
+        }.addTo(compositeDisposable)
 
         connect.setOnClickListener {
 
@@ -150,7 +144,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun initRealView() {
-        d3 = getDeviceService()
+        getDeviceService()
             .initRealView()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
@@ -183,6 +177,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 setResult(RESULT_CANCELED)
                 finish()
             })
+            .addTo(compositeDisposable)
     }
 
     override fun onBackPressed() {
@@ -197,7 +192,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         layout_connect.visibility = View.GONE
         progress_container.visibility = View.VISIBLE
 
-        d2 = getDeviceService().startRealView()
+        getDeviceService().startRealView()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -214,25 +209,24 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 handleError(it)
                 finish()
             })
+            .addTo(compositeDisposable)
 
-        d6 = video_surface_view.initSubject.subscribe({
+        video_surface_view
+            .initSubject
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
             //收到第一帧后 隐藏进度条
             progress_container.visibility = View.GONE
             divider.visibility = View.GONE
         }, {
             handleError(it)
-        })
+        }).addTo(compositeDisposable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        d1?.dispose()
-        d2?.dispose()
-        d3?.dispose()
-        d4?.dispose()
-        d5?.dispose()
-        d6?.dispose()
+        compositeDisposable.dispose()
 
         unregisterReceiver(receiver)
     }

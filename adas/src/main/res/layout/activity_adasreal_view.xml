@@ -44,6 +44,7 @@
             android:paddingStart="48dp"
             android:paddingEnd="48dp"
             android:paddingTop="24dp"
+            android:visibility="gone"
             android:paddingBottom="24dp"
             android:id="@+id/layout_connect"
             >

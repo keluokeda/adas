@@ -11,6 +11,7 @@ import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.subjects.PublishSubject
 import java.util.*
 
 @Suppress("unused")
@@ -21,11 +22,13 @@ class DeviceService(
 
     private val deviceHelper = DeviceHelper()
 
+    private val connectStateSubject = PublishSubject.create<Boolean>()
+
     /**
      * 初始化
      */
     fun init(context: Context, appKey: String): Observable<Boolean> {
-        return Observable.create {
+        val o = Observable.create<Boolean> {
             deviceHelper.initSDK(context.applicationContext, appKey, object : Oninit {
                 override fun onSuccess() {
                     logger.loggerMessage("初始化成功")
@@ -42,6 +45,21 @@ class DeviceService(
             })
         }
 
+        deviceHelper.setDeviceConnectStateListener(object : OnDeviceConnectionStateChange {
+            override fun onConnectionStateChange(p0: Int) {
+                logger.loggerMessage("设备连接状态发生变化 $p0")
+                connectStateSubject.onNext(p0 == 1)
+            }
+
+            override fun onSocketStateChange(p0: Int) {
+                logger.loggerMessage("设备socket状态发生变化 $p0")
+            }
+
+        })
+
+
+        return o
+
 
     }
 
@@ -53,27 +71,9 @@ class DeviceService(
     }
 
     /**
-     * 设置声音提示方式
+     * 观察设备连接状态
      */
-//    fun setVoiceType(voiceType: VoiceType): Observable<Boolean> {
-//        return Observable.create<Boolean> {
-//            deviceHelper.setADASVoice(
-//                voiceType.type,
-//                voiceType.type,
-//                voiceType.type,
-//                voiceType.type,
-//                object : SetDeviceInfoCallback {
-//                    override fun onSuccess() {
-//                        it.onNext(true)
-//                    }
-//
-//                    override fun onFail(p0: Int) {
-//                        it.onError(DeviceException(p0))
-//                    }
-//
-//                })
-//        }
-//    }
+    fun observeConnectState(): Observable<Boolean> = connectStateSubject
 
 
     /**
