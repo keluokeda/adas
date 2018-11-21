@@ -282,16 +282,19 @@ class DeviceService(
      */
     fun setDeviceSensitivityLevel(deviceSensitivityLevel: DeviceSensitivityLevel): Observable<Boolean> {
         return Observable.create<Boolean> {
+            logger.loggerMessage("开始设置报警灵敏度 $deviceSensitivityLevel")
             deviceHelper.setADASSensitivityLevel(
                 deviceSensitivityLevel.ldw,
                 deviceSensitivityLevel.fcw,
                 deviceSensitivityLevel.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
+                        logger.loggerMessage("设置报警灵敏度 结果 成功 $deviceSensitivityLevel")
                         it.onNext(true)
                     }
 
                     override fun onFail(p0: Int) {
+                        logger.loggerMessage("设置报警灵敏度 结果 失败 $p0 $deviceSensitivityLevel")
                         it.onError(DeviceException(p0))
                     }
 
@@ -306,12 +309,15 @@ class DeviceService(
     fun getDeviceSensitivityLevel(): Observable<DeviceSensitivityLevel> {
 
         return Observable.create<DeviceSensitivityLevel> {
+            logger.loggerMessage("开始获取报警灵敏度")
             deviceHelper.getADASSensitivityLevel(object : GetADASInfoCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    logger.loggerMessage("获取报警灵敏度成功")
                     it.onNext(DeviceSensitivityLevel(p0, p1, p2))
                 }
 
                 override fun onFail(p0: Int) {
+                    logger.loggerMessage("获取报警灵敏度失败")
                     it.onError(DeviceException(p0))
                 }
 
@@ -324,12 +330,15 @@ class DeviceService(
      */
     fun getSpeedThreshold(): Observable<SpeedThreshold> {
         return Observable.create<SpeedThreshold> {
+            logger.loggerMessage("开始获取报警启动车速")
             deviceHelper.GetADASSpeedThreshold(object : GetADASInfoCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    logger.loggerMessage("获取报警启动车速成功")
                     it.onNext(SpeedThreshold(p0, p1, p2))
                 }
 
                 override fun onFail(p0: Int) {
+                    logger.loggerMessage("获取报警启动车速失败 $p0")
                     it.onError(DeviceException(p0))
                 }
             })
@@ -341,16 +350,21 @@ class DeviceService(
      */
     fun setSpeedThreshold(speedThreshold: SpeedThreshold): Observable<Boolean> {
         return Observable.create<Boolean> {
+            logger.loggerMessage("开始设置报警启动车速 $speedThreshold")
             deviceHelper.setADASSpeedThreshold(
                 speedThreshold.ldw,
                 speedThreshold.fcw,
                 speedThreshold.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
+                        logger.loggerMessage("设置报警启动车速成功")
+
                         it.onNext(true)
                     }
 
                     override fun onFail(p0: Int) {
+                        logger.loggerMessage("设置报警启动车速失败 $p0")
+
                         it.onError(DeviceException(p0))
                     }
 
@@ -363,12 +377,16 @@ class DeviceService(
      */
     fun getAlarmConfiguration(): Observable<AlarmConfiguration> {
         return Observable.create<AlarmConfiguration> {
+            logger.loggerMessage("开始获取设备报警配置")
             deviceHelper.getADASAlarmConfiguration(object : onGetADASAlarmConfigurationCallback {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
+                    logger.loggerMessage("获取设备报警配置成功")
                     it.onNext(AlarmConfiguration(p0, p1, p2, p3))
                 }
 
                 override fun onFail(p0: Int) {
+                    logger.loggerMessage("获取设备报警配置失败 $p0")
+
                     it.onError(DeviceException(p0))
                 }
 
@@ -381,6 +399,7 @@ class DeviceService(
      */
     fun setAlarmConfiguration(alarmConfiguration: AlarmConfiguration): Observable<Boolean> {
         return Observable.create<Boolean> {
+            logger.loggerMessage("开始设置设备报警配置")
             deviceHelper.ADASAlarmConfiguration(
                 alarmConfiguration.p0,
                 alarmConfiguration.p1,
