@@ -4,9 +4,7 @@ import android.content.Context
 import bean.BLEDevice
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
-import com.ke.adas.entity.Device
-import com.ke.adas.entity.DeviceSensitivityLevel
-import com.ke.adas.entity.RealViewEntity
+import com.ke.adas.entity.*
 import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
@@ -56,6 +54,10 @@ class DeviceService(
             }
 
         })
+
+        //开启工程模式
+        deviceHelper.openEngineeringModel()
+
 
 
         return o
@@ -353,6 +355,39 @@ class DeviceService(
                     }
 
                 })
+        }
+    }
+
+    /**
+     * 获取设备报警配置
+     */
+    fun getAlarmConfiguration(): Observable<AlarmConfiguration> {
+        return Observable.create<AlarmConfiguration> {
+            deviceHelper.getADASAlarmConfiguration(object : onGetADASAlarmConfigurationCallback {
+                override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
+                    it.onNext(AlarmConfiguration(p0, p1, p2, p3))
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    /**
+     * 设置报警配置
+     */
+    fun setAlarmConfiguration(alarmConfiguration: AlarmConfiguration): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.ADASAlarmConfiguration(
+                alarmConfiguration.p0,
+                alarmConfiguration.p1,
+                alarmConfiguration.p2,
+                alarmConfiguration.p3,
+                getSetDeviceInfoCallback(it)
+            )
         }
     }
 
