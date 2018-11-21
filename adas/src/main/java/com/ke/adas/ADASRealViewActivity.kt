@@ -13,6 +13,7 @@ import android.text.TextUtils
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Toast
 import com.ke.adas.entity.RealViewEntity
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -39,6 +40,10 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     private val speedSubject = PublishSubject.create<String>()
 
+    private val deviceWifiDisconnectedSubject = PublishSubject.create<Boolean>()
+
+    private var isDeviceWifiConnected = false
+
 
     private var wifiName: String? = null
 
@@ -56,14 +61,20 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
             loggerMessage("网络信息 $netWorkInfo")
 
-            if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && TextUtils.equals(
-                    wifiName,
-                    netWorkInfo.extraInfo.replace("\"", "")
-                )
+            if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && isDeviceWifi(netWorkInfo)
             ) {
                 //连上设备的wifi
                 //这里可能会走两次
                 emitter.onSuccess(true)
+
+            } else if (netWorkInfo.detailedState == NetworkInfo.DetailedState.DISCONNECTED && isDeviceWifi(netWorkInfo)) {
+                //设备wifi已经断开
+
+                loggerMessage("设备wifi已经断开")
+
+                if (isDeviceWifiConnected) {
+                    deviceWifiDisconnectedSubject.onNext(true)
+                }
 
             }
 
@@ -103,14 +114,54 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         registerReceiver(receiver, intentFilter)
 
         hideNavigation()
+
+
+        deviceWifiDisconnectedSubject.debounce(1000, TimeUnit.MILLISECONDS).subscribe(
+            {
+                reconnectDeviceWifi()
+            }, {
+                handleError(it)
+            }
+        ).addTo(compositeDisposable)
     }
 
+
+    /**
+     * 重新连接设备wifi
+     */
+    private fun reconnectDeviceWifi() {
+        loggerMessage("开始重新连接设备wifi")
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        val list = wifiManager.configuredNetworks
+
+        val deviceWifiConfiguration = list.firstOrNull { isDeviceWifiSSID(it.SSID) }
+
+        if (deviceWifiConfiguration != null) {
+            val result = wifiManager.enableNetwork(deviceWifiConfiguration.networkId, true)
+            loggerMessage("开始重新和设备建立wifi连接 连接结果 $result wifi信息 $deviceWifiConfiguration")
+        } else {
+            loggerMessage("重新连接时发现手机没有保存设备wifi信息")
+        }
+    }
+
+    /**
+     * 是否是设备wifi
+     */
+    private fun isDeviceWifi(networkInfo: NetworkInfo): Boolean {
+        return isDeviceWifiSSID(networkInfo.extraInfo)
+    }
+
+    private fun isDeviceWifiSSID(ssid: String): Boolean {
+        return TextUtils.equals(wifiName, ssid.replace("\"", ""))
+    }
 
     private fun addDeviceStateChangedListener() {
         getDeviceService().observeConnectState().observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 if (!it) {
                     loggerMessage("设备已经断开")
+                    Toast.makeText(applicationContext, "蓝牙已断开", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }, {
@@ -141,6 +192,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             emitter = it
         }
             .subscribe(Consumer {
+                isDeviceWifiConnected = true
                 initRealView()
                 startRealView()
             }).addTo(compositeDisposable)
