@@ -85,6 +85,58 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         progress_container.visibility = View.VISIBLE
 
 
+        addWifiConnectedListener()
+
+        openDeviceRealViewMode()
+
+        addDeviceStateChangedListener()
+
+        updateSpeed()
+
+        initViewListener()
+
+        val intentFilter = IntentFilter()
+            .apply {
+                addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+            }
+
+        registerReceiver(receiver, intentFilter)
+
+        hideNavigation()
+    }
+
+
+    private fun addDeviceStateChangedListener() {
+        getDeviceService().observeConnectState().observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                if (!it) {
+                    loggerMessage("设备已经断开")
+                    finish()
+                }
+            }, {
+                handleError(it)
+            }).addTo(compositeDisposable)
+    }
+
+    private fun initViewListener() {
+        connect.setOnClickListener {
+
+            //跳转到wifi设置界面
+            startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+        }
+
+        back.setOnClickListener {
+            finish()
+        }
+    }
+
+    private fun updateSpeed() {
+        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
+            tv_speed.text = it
+        }.addTo(compositeDisposable)
+    }
+
+    private fun addWifiConnectedListener() {
         Single.create<Boolean> {
             emitter = it
         }
@@ -92,7 +144,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 initRealView()
                 startRealView()
             }).addTo(compositeDisposable)
+    }
 
+    private fun openDeviceRealViewMode() {
         getDeviceService()
             .openDeviceRealViewMode()
             .subscribeOn(Schedulers.io())
@@ -110,30 +164,6 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     finish()
                 }
             ).addTo(compositeDisposable)
-
-
-        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
-            tv_speed.text = it
-        }.addTo(compositeDisposable)
-
-        connect.setOnClickListener {
-
-            //跳转到wifi设置界面
-            startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-        }
-
-        back.setOnClickListener {
-            finish()
-        }
-
-        val intentFilter = IntentFilter()
-            .apply {
-                addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-            }
-
-        registerReceiver(receiver, intentFilter)
-
-        hideNavigation()
     }
 
     private fun hideNavigation() {
@@ -215,12 +245,12 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .initSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-            //收到第一帧后 隐藏进度条
-            progress_container.visibility = View.GONE
-            divider.visibility = View.GONE
-        }, {
-            handleError(it)
-        }).addTo(compositeDisposable)
+                //收到第一帧后 隐藏进度条
+                progress_container.visibility = View.GONE
+                divider.visibility = View.GONE
+            }, {
+                handleError(it)
+            }).addTo(compositeDisposable)
     }
 
     override fun onDestroy() {
