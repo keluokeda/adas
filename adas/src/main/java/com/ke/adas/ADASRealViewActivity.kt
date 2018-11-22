@@ -299,7 +299,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .subscribe({
                 //收到第一帧后 隐藏进度条
                 progress_container.visibility = View.GONE
-                divider.visibility = View.GONE
+                divider.visibility = View.VISIBLE
             }, {
                 handleError(it)
             }).addTo(compositeDisposable)

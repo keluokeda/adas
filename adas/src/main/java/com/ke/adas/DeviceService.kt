@@ -22,6 +22,8 @@ class DeviceService(
 
     private val connectStateSubject = PublishSubject.create<Boolean>()
 
+    private val adasEventSubject = PublishSubject.create<Int>()
+
     /**
      * 初始化
      */
@@ -57,6 +59,10 @@ class DeviceService(
 
         //开启工程模式
         deviceHelper.openEngineeringModel()
+
+        deviceHelper.openADASEventListener {
+            adasEventSubject.onNext(it)
+        }
 
 
 
@@ -302,6 +308,9 @@ class DeviceService(
         }
     }
 
+    fun observeAdasEvent(): Observable<Int> {
+        return adasEventSubject
+    }
 
     /**
      * 获取报警灵敏度
