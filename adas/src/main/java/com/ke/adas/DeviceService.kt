@@ -427,7 +427,7 @@ class DeviceService(
             }
 
             override fun onFail(p0: Int) {
-                logger.loggerMessage("设置设备信息失败")
+                logger.loggerMessage("设置设备信息失败 $p0")
                 e.onError(DeviceException(p0))
             }
 
