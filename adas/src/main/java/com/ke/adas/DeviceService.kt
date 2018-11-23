@@ -419,6 +419,49 @@ class DeviceService(
         }
     }
 
+    fun getVoice(): Observable<Int> {
+        return Observable.create<Int> {
+            deviceHelper.getVoice(object : onGetVoiceCallback {
+                override fun onSuccess(p0: Int) {
+                    it.onNext(p0)
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    fun setVoice(voice: Int): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setVoice(voice, getSetDeviceInfoCallback(it))
+        }
+    }
+
+    fun getVoiceType(): Observable<Int> {
+
+        return Observable.create<Int> {
+            deviceHelper.getADASVoiceParam(object : onGetADASVoiceTypeCallback {
+                override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
+                    it.onNext(p0)
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    fun setVoiceType(type: Int): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setADASVoice(type, type, type, type, getSetDeviceInfoCallback(it))
+        }
+    }
+
 
     private fun getSetDeviceInfoCallback(e: ObservableEmitter<Boolean>): SetDeviceInfoCallback {
         return object : SetDeviceInfoCallback {
@@ -454,5 +497,6 @@ class DeviceService(
             }
         }
     }
+
 
 }
