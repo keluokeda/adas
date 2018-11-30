@@ -87,6 +87,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         requestFullScreen()
         setContentView(R.layout.activity_adasreal_view)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
 
         if (!getDeviceService().isConnectedDevice()) {
