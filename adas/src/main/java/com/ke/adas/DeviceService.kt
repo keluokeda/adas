@@ -99,6 +99,7 @@ class DeviceService(
      */
     fun scanDevice(): Observable<Device> {
         return Observable.create<Device> {
+            logger.loggerMessage("开始扫描设备")
             deviceHelper.startScanDevice(object : OnScanDeviceLisetener {
                 override fun onSuccess() {
                     logger.loggerMessage("扫描设备成功")
@@ -130,6 +131,7 @@ class DeviceService(
      */
     fun loginDevice(device: Device): Observable<Boolean> {
         return Observable.create<Boolean> {
+            logger.loggerMessage("开始登录设备")
             deviceHelper.loginDevice(device.bleDevice, object : BleLoginListener {
                 override fun onSuccess() {
                     logger.loggerMessage("登录设备成功")
