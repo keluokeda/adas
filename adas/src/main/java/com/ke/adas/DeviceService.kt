@@ -95,6 +95,33 @@ class DeviceService(
 
 
     /**
+     * 设置hmw时间 6-25
+     */
+    fun setHMWTime(value: Int): Observable<Boolean> {
+        val time = if (value > 25) 25 else if (value < 8) 8 else value
+
+        return Observable.create {
+            deviceHelper.setHMWTime(time, getSetDeviceInfoCallback(it))
+        }
+    }
+
+    fun getHMWTime(): Observable<Double> {
+        return Observable.create {
+            deviceHelper.getHMWTime(object : onGetHMWTimeCallback {
+                override fun onSuccess(p0: Int) {
+                    it.onNext(p0 / 10.0)
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+
+    /**
      * 扫描设备
      */
     fun scanDevice(): Observable<Device> {
