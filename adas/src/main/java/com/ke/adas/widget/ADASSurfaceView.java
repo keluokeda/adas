@@ -125,9 +125,9 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             try {
 
                 int width = 1280;
-                float scaleWidth = (float) screenWidth / width;
+                float scaleWidth = (float) getWidth() / width;
                 int height = 720;
-                float scaleHeight = (float) screenHeight / height;
+                float scaleHeight = (float) getHeight() / height;
                 clear(canvas);
                 for (int i = 0; i < drawList.size(); i++) {
                     DrawShape ds = drawList.get(i);
