@@ -16,7 +16,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -125,9 +124,9 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         if (drawList.size() > 0 && canvas != null) {
             try {
 
-                int width = getWidth();
+                int width = 1280;
                 float scaleWidth = (float) screenWidth / width;
-                int height = getHeight();
+                int height = 720;
                 float scaleHeight = (float) screenHeight / height;
                 clear(canvas);
                 for (int i = 0; i < drawList.size(); i++) {
