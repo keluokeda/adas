@@ -34,8 +34,8 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     // Video Constants
     private final static String MIME_TYPE = "video/avc"; // H.264 Advanced Video
-    private final static int VIDEO_WIDTH = 1280;
-    private final static int VIDEO_HEIGHT = 720;
+//    private final static int VIDEO_WIDTH = 1280;
+//    private final static int VIDEO_HEIGHT = 720;
     private final static int TIME_INTERNAL = 30;
 
     private ObservableEmitter<Pair<byte[], Integer>> subscriber;
@@ -91,7 +91,7 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private void initDecoder(SurfaceHolder holder) {
 
         try {
-            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, VIDEO_WIDTH, VIDEO_HEIGHT);
+            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, getWidth(), getHeight());
             format.setByteBuffer("csd-0", ByteBuffer.wrap(sps));
             format.setByteBuffer("csd-1", ByteBuffer.wrap(pps));
             /* create & config android.media.MediaCodec */
