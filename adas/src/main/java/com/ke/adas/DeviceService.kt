@@ -2,6 +2,7 @@ package com.ke.adas
 
 import android.content.Context
 import bean.BLEDevice
+import bean.DVRInfo
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
 import com.ke.adas.entity.*
@@ -92,8 +93,6 @@ class DeviceService(
             deviceHelper.setVoice(voice, getSetDeviceInfoCallback(it))
         }
     }
-
-
 
 
     /**
@@ -232,24 +231,6 @@ class DeviceService(
         deviceHelper.closeDeviceRealViewMode()
     }
 
-    /**
-     * 设置设备wifi密码
-     */
-    fun setDeviceWifiPassword(password: String): Observable<Boolean> {
-        return Observable.create<Boolean> {
-            deviceHelper.setDeviceWifiPassword(password, getSetDeviceInfoCallback(it))
-        }
-    }
-
-    /**
-     * 获取设备wifi信息
-     */
-    fun getDeviceWifiInfo(): Observable<Pair<String, String>> {
-        return Observable.create<Pair<String, String>> {
-            deviceHelper.getDeviceWifiNameAndPassword(getOnWifiOpenListener(it))
-        }
-    }
-
 
     /**
      * 初始化实况模式 3
@@ -286,6 +267,105 @@ class DeviceService(
 
     }
 
+
+    /**
+     * 开启设备下载视频模式
+     */
+    fun startDeviceDownloadVideoMode(): Observable<Pair<String, String>> {
+
+        return Observable.create<Pair<String, String>> {
+
+            logger.loggerMessage("开启设备视频下载模式")
+            deviceHelper.openDeviceDownloadDVRMode(getOnWifiOpenListener(it))
+        }
+            .doOnDispose {
+                logger.loggerMessage("关闭设备视频下载模式")
+                deviceHelper.closeDeviceDownloadDVRMode()
+            }
+    }
+
+
+    /**
+     * 获取视频列表
+     */
+    fun getVideoList(pageNo: Int, pageSize: Int = 100): Observable<List<DeviceVideo>> {
+        return Observable.create {
+            deviceHelper.getDVRLists(pageNo * pageSize, pageSize, object : DrivingVideoOperationListener {
+                override fun onLockOrUnlockResult(p0: Boolean) {
+
+                }
+
+                override fun onGetVideoList(p0: ArrayList<*>) {
+                    logger.loggerMessage("onGetVideoList $p0")
+
+
+                    val list = p0.map { any ->
+                        any as DVRInfo
+                    }
+                        .map { info ->
+                            info.toDeviceVideo()
+                        }
+                    it.onNext(list)
+                }
+
+                override fun onLast() {
+
+                    logger.loggerMessage("getVideoList onLast")
+                    it.onNext(emptyList())
+                }
+
+            })
+
+        }
+    }
+
+
+    /**
+     * 下载视频
+     */
+    fun downloadVideo(videoName: String): Observable<DownloadVideoInfo> {
+        return Observable.create {
+            logger.loggerMessage("开始下载视频 视频名称 $videoName")
+            deviceHelper.downloadDVR(videoName, object : ProgressCallback {
+                override fun onDone(p0: String, p1: String) {
+                    val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = p0, fileMd5 = p1)
+
+                    logger.loggerMessage("下载视频完成 $downloadVideoInfo")
+                    it.onNext(downloadVideoInfo)
+                    it.onComplete()
+                }
+
+                override fun onProgressChange(p0: Long) {
+                    it.onNext(DownloadVideoInfo(videoName = videoName, progress = p0))
+                }
+
+                override fun onErro(p0: Int) {
+                    logger.loggerMessage("下载视频失败 视频名称 $videoName")
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+
+    /**
+     * 设置设备wifi密码
+     */
+    fun setDeviceWifiPassword(password: String): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setDeviceWifiPassword(password, getSetDeviceInfoCallback(it))
+        }
+    }
+
+    /**
+     * 获取设备wifi信息
+     */
+    fun getDeviceWifiInfo(): Observable<Pair<String, String>> {
+        return Observable.create<Pair<String, String>> {
+            deviceHelper.getDeviceWifiNameAndPassword(getOnWifiOpenListener(it))
+        }
+    }
 
     /**
      * 设置报警灵敏度
@@ -529,4 +609,12 @@ class DeviceService(
     }
 
 
+}
+
+fun DVRInfo.toDeviceVideo(): DeviceVideo {
+    return DeviceVideo(
+        name = name,
+        lock = "0" != state,
+        state = state
+    )
 }
