@@ -1,15 +1,13 @@
 package com.ke.adas.widget;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.*;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import bean.DrawShape;
+import com.ke.adas.R;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -50,15 +48,7 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         paint = new Paint();
         paint.setAntiAlias(true);
 
-        post(() -> {
-            Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            display.getMetrics(displayMetrics);
-            int screenWidth = displayMetrics.widthPixels;// 得到宽度
-            int screenHeight = displayMetrics.heightPixels;// 得到高度
-            setScreenWidth(screenWidth);
-            setScreenHeight(screenHeight);
-        });
+
     }
 
     private void initSubscription() {
@@ -96,17 +86,9 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
     }
 
-    private int screenWidth;
-    private int screenHeight;
 
 
-    private void setScreenWidth(int screenWidth) {
-        this.screenWidth = screenWidth;
-    }
 
-    private void setScreenHeight(int screenHeight) {
-        this.screenHeight = screenHeight;
-    }
 
     private void clear(Canvas canvas) {
         if (canvas == null) {
@@ -137,7 +119,7 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                     float y0 = ds.getY0() * scaleHeight;
                     float x1 = ds.getX1() * scaleWidth;
                     float y1 = ds.getY1() * scaleHeight;
-                    float stroke_width = ds.getStroke_width();
+                    float stroke_width = getResources().getDimension(R.dimen.stroke_width);
                     int color = ds.getColor();
                     boolean isDashed = ds.isDashed();
 
