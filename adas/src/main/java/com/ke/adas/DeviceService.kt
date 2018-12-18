@@ -92,7 +92,7 @@ class DeviceService(
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-        val ssid = wifiInfo?.ssid?.replace("/", "")
+        val ssid = wifiInfo?.ssid?.replace("\"", "")
 
         logger.loggerMessage("当前连接的Wi-Fi名称 $ssid")
 
