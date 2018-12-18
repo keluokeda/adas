@@ -1,6 +1,7 @@
 package com.ke.adas
 
 import android.content.Context
+import android.net.wifi.WifiManager
 import bean.BLEDevice
 import bean.DVRInfo
 import bean.DrawShape
@@ -25,10 +26,14 @@ class DeviceService(
 
     private val adasEventSubject = PublishSubject.create<Int>()
 
+
+    private lateinit var context: Context
+
     /**
      * 初始化
      */
     fun init(context: Context, appKey: String): Observable<Boolean> {
+        this.context = context
         val o = Observable.create<Boolean> {
             deviceHelper.initSDK(context.applicationContext, appKey, object : Oninit {
                 override fun onSuccess() {
@@ -77,6 +82,23 @@ class DeviceService(
      */
     fun isConnectedDevice(): Boolean {
         return deviceHelper.isConnectedDevice
+    }
+
+
+    /**
+     * 设备wifi是否连上
+     */
+    fun isWifiConnected(): Observable<Boolean> {
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.connectionInfo
+
+        val ssid = wifiInfo?.ssid?.replace("/", "")
+
+        logger.loggerMessage("当前连接的Wi-Fi名称 $ssid")
+
+        return getDeviceWifiInfo().map { it.first }
+            .map { it == ssid }
+
     }
 
     /**
