@@ -317,7 +317,7 @@ class DeviceService(
                 }
 
                 override fun onGetVideoList(p0: ArrayList<*>) {
-                    logger.loggerMessage("onGetVideoList $p0")
+                    logger.loggerMessage("onGetVideoList $pageNo $p0")
 
 
                     val list = p0.map { any ->
@@ -331,7 +331,7 @@ class DeviceService(
 
                 override fun onLast() {
 
-                    logger.loggerMessage("getVideoList onLast")
+                    logger.loggerMessage("getVideoList $pageNo onLast")
                     it.onNext(emptyList())
                 }
 
