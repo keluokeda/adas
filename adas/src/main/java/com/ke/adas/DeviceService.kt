@@ -231,6 +231,19 @@ class DeviceService(
     }
 
 
+    fun openDeviceWifi(): Observable<Pair<String, String>> {
+        return Observable.create {
+            logger.loggerMessage("打开设备wifi")
+            deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
+        }
+    }
+
+    fun closeDeviceWifi() {
+        logger.loggerMessage("关闭设备Wi-Fi")
+        deviceHelper.closeDeviceRealViewMode()
+    }
+
+
     /**
      * 打开设备实况模式 1
      */
