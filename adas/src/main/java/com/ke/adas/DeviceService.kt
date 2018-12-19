@@ -234,13 +234,13 @@ class DeviceService(
     fun openDeviceWifi(): Observable<Pair<String, String>> {
         return Observable.create {
             logger.loggerMessage("打开设备wifi")
-            deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
+            deviceHelper.openDeviceDownloadDVRMode(getOnWifiOpenListener(it))
         }
     }
 
     fun closeDeviceWifi() {
         logger.loggerMessage("关闭设备Wi-Fi")
-        deviceHelper.closeDeviceRealViewMode()
+        deviceHelper.closeDeviceDownloadDVRMode()
     }
 
 
@@ -303,21 +303,7 @@ class DeviceService(
     }
 
 
-    /**
-     * 开启设备下载视频模式
-     */
-    fun startDeviceDownloadVideoMode(): Observable<Pair<String, String>> {
 
-        return Observable.create<Pair<String, String>> {
-
-            logger.loggerMessage("开启设备视频下载模式")
-            deviceHelper.openDeviceDownloadDVRMode(getOnWifiOpenListener(it))
-        }
-            .doOnDispose {
-                logger.loggerMessage("关闭设备视频下载模式")
-                deviceHelper.closeDeviceDownloadDVRMode()
-            }
-    }
 
 
     /**
