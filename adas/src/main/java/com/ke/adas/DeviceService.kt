@@ -303,9 +303,6 @@ class DeviceService(
     }
 
 
-
-
-
     /**
      * 获取视频列表
      */
@@ -367,6 +364,13 @@ class DeviceService(
 
             })
         }
+    }
+
+    /**
+     * 获取下载视频的目录
+     */
+    fun getDownloadVideoPath(): String {
+        return deviceHelper.downloadDir
     }
 
 
