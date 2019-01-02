@@ -150,7 +150,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
      * 是否是设备wifi
      */
     private fun isDeviceWifi(networkInfo: NetworkInfo): Boolean {
-        return isDeviceWifiSSID(networkInfo.extraInfo)
+        return isDeviceWifiSSID(networkInfo.extraInfo ?: return false)
     }
 
     private fun isDeviceWifiSSID(ssid: String): Boolean {
