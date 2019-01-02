@@ -61,13 +61,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
             loggerMessage("网络信息 $netWorkInfo")
 
-            if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && isDeviceWifi(netWorkInfo)
+            if (netWorkInfo.detailedState == NetworkInfo.DetailedState.CONNECTED && isDeviceWifiConnected()
             ) {
                 //连上设备的wifi
                 //这里可能会走两次
                 emitter.onSuccess(true)
 
-            } else if (netWorkInfo.detailedState == NetworkInfo.DetailedState.DISCONNECTED && isDeviceWifi(netWorkInfo)) {
+            } else if (netWorkInfo.detailedState == NetworkInfo.DetailedState.DISCONNECTED && isDeviceWifiConnected()) {
                 //设备wifi已经断开
 
                 loggerMessage("设备wifi已经断开")
@@ -149,8 +149,16 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     /**
      * 是否是设备wifi
      */
-    private fun isDeviceWifi(networkInfo: NetworkInfo): Boolean {
-        return isDeviceWifiSSID(networkInfo.extraInfo ?: return false)
+    private fun isDeviceWifiConnected(): Boolean {
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.connectionInfo
+
+        val ssid = wifiInfo?.ssid?.replace("\"", "")
+
+        return TextUtils.equals(ssid, wifiName)
+
+//        return isDeviceWifiSSID(networkInfo.extraInfo ?: return false)
     }
 
     private fun isDeviceWifiSSID(ssid: String): Boolean {
