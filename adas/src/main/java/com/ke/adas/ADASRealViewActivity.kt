@@ -147,7 +147,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     /**
-     * 是否是设备wifi
+     * 设备wifi是否连上
      */
     private fun isDeviceWifiConnected(): Boolean {
 

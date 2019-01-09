@@ -598,6 +598,25 @@ class DeviceService(
     }
 
 
+    /**
+     * 获取版本信息
+     */
+    fun getVersion(): Observable<Version> {
+        return Observable.create {
+            deviceHelper.getDeviceVersion(object : GetBleInfoVersionCallback {
+                override fun onSuccess(p0: String, p1: String, p2: String, p3: String, p4: String, p5: String) {
+                    it.onNext(Version(p0, p1, p2, p3, p4, p5))
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+
     private fun getSetDeviceInfoCallback(e: ObservableEmitter<Boolean>): SetDeviceInfoCallback {
         return object : SetDeviceInfoCallback {
             override fun onSuccess() {
