@@ -6,13 +6,11 @@ import bean.BLEDevice
 import bean.DVRInfo
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
-import com.google.gson.GsonBuilder
 import com.ke.adas.entity.*
 import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
-import io.reactivex.Scheduler
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import okhttp3.OkHttpClient
@@ -647,20 +645,21 @@ class DeviceService(
     /**
      * 获取更新信息
      */
-    fun getUpdateMessage(updateType: UpdateType): Observable<CheckUpdateResult> {
-        return getVersion()
-            .flatMap {
-                checkUpdateService.checkUpdate(
-                    updateType.type,
-                    obdVersion = it.obdVersion,
-                    buzzerVersion = it.buzzerVersion
-                )
-                    .subscribeOn(Schedulers.io())
-                    .onErrorReturn { throwable ->
+    fun getUpdateMessage(
+        updateType: UpdateType,
+        obdVersion: String,
+        buzzerVersion: String
+    ): Observable<CheckUpdateResult> {
+        return checkUpdateService.checkUpdate(
+            updateType.type,
+            obdVersion = obdVersion,
+            buzzerVersion = buzzerVersion
+        )
+            .subscribeOn(Schedulers.io())
+            .onErrorReturn { throwable ->
 
-                        logger.loggerMessage(throwable.message ?: "出错了")
-                        return@onErrorReturn CheckUpdateResult(result = 110, message = null)
-                    }
+                logger.loggerMessage(throwable.message ?: "出错了")
+                return@onErrorReturn CheckUpdateResult(result = 110, message = null)
             }
 
 
