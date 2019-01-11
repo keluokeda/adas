@@ -6,19 +6,46 @@ import bean.BLEDevice
 import bean.DVRInfo
 import bean.DrawShape
 import com.example.vispect_blesdk.DeviceHelper
+import com.google.gson.GsonBuilder
 import com.ke.adas.entity.*
 import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Suppress("unused")
 class DeviceService(
     private val logger: Logger
 ) {
 
+    private val checkUpdateService: CheckUpdateService
+
+    init {
+        val baseUrl = "http://server.vispect.net:8080/"
+
+        val client = OkHttpClient.Builder()
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        checkUpdateService = Retrofit.Builder()
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .baseUrl(baseUrl)
+            .build()
+            .create(CheckUpdateService::class.java)
+    }
 
     private val deviceHelper = DeviceHelper()
 
@@ -614,6 +641,29 @@ class DeviceService(
 
             })
         }
+    }
+
+
+    /**
+     * 获取更新信息
+     */
+    fun getUpdateMessage(updateType: UpdateType): Observable<CheckUpdateResult> {
+        return getVersion()
+            .flatMap {
+                checkUpdateService.checkUpdate(
+                    updateType.type,
+                    obdVersion = it.obdVersion,
+                    buzzerVersion = it.buzzerVersion
+                )
+                    .subscribeOn(Schedulers.io())
+                    .onErrorReturn { throwable ->
+
+                        logger.loggerMessage(throwable.message ?: "出错了")
+                        return@onErrorReturn CheckUpdateResult(result = 110, message = null)
+                    }
+            }
+
+
     }
 
 
