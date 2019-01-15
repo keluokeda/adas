@@ -650,6 +650,9 @@ class DeviceService(
         obdVersion: String,
         buzzerVersion: String
     ): Observable<CheckUpdateResult> {
+
+//        deviceHelper.uploadMCUUpdateFIle()
+
         return checkUpdateService.checkUpdate(
             updateType.type,
             obdVersion = obdVersion,
