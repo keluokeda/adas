@@ -668,11 +668,68 @@ class DeviceService(
 
 
     /**
-     * 更新设备apk
+     * 更新设备app
      */
-    fun updateDeviceApk(path:String){
+    fun updateDeviceApp(path: String): Observable<Int> {
+        return Observable.create {
+
+            deviceHelper.deviceAPKUpdate(path, createProgressCallback(it))
+        }
+
+    }
 
 
+    /**
+     * 开启设备升级模式
+     */
+    fun openDeviceUpdateMode(): Observable<Pair<String, String>> {
+
+        return Observable.create<Pair<String, String>> {
+            deviceHelper.openDeviceUpdateMode(getOnWifiOpenListener(it))
+        }.doOnDispose {
+            deviceHelper.closeDeviceUpdateMode()
+        }.doOnComplete {
+            deviceHelper.closeDeviceUpdateMode()
+        }
+    }
+
+
+    /**
+     * 更新设备obd
+     */
+    fun updateDeviceObd(path: String): Observable<Int> {
+        return Observable.create {
+            deviceHelper.uploadOBDUpdataFile(path, createProgressCallback(it))
+        }
+    }
+
+
+    /**
+     * 更新设备固件
+     */
+    fun updateHardWare(path: String): Observable<Int> {
+
+        return Observable.create {
+            deviceHelper.deviceOTAUpdate(path, createProgressCallback(it))
+        }
+    }
+
+    private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
+
+        return object : ProgressCallback {
+            override fun onDone(p0: String, p1: String) {
+                observableEmitter.onComplete()
+            }
+
+            override fun onProgressChange(p0: Long) {
+                observableEmitter.onNext(p0.toInt())
+            }
+
+            override fun onErro(p0: Int) {
+                observableEmitter.onError(DeviceException(p0))
+            }
+
+        }
     }
 
 
