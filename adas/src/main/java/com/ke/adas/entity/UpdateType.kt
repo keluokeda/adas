@@ -5,9 +5,8 @@ import android.os.Parcelable
 
 enum class UpdateType(val type: Int) : Parcelable {
     Hardware(1),
-    OperatingSystem(3),
     Obd(9),
-    SoftWare(10);
+    App(10);
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(type)
@@ -22,9 +21,8 @@ enum class UpdateType(val type: Int) : Parcelable {
         override fun createFromParcel(parcel: Parcel): UpdateType {
             return when (parcel.readInt()) {
                 1 -> Hardware
-                3 -> OperatingSystem
                 9 -> Obd
-                10 -> SoftWare
+                10 -> App
                 else -> Hardware
             }
         }

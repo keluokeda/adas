@@ -651,7 +651,6 @@ class DeviceService(
         buzzerVersion: String
     ): Observable<CheckUpdateResult> {
 
-//        deviceHelper.uploadMCUUpdateFIle()
 
         return checkUpdateService.checkUpdate(
             updateType.type,
@@ -664,6 +663,14 @@ class DeviceService(
                 logger.loggerMessage(throwable.message ?: "出错了")
                 return@onErrorReturn CheckUpdateResult(result = 110, message = null)
             }
+
+    }
+
+
+    /**
+     * 更新设备apk
+     */
+    fun updateDeviceApk(path:String){
 
 
     }
