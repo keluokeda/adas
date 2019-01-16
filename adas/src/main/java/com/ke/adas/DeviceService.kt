@@ -256,14 +256,14 @@ class DeviceService(
     }
 
 
-    fun openDeviceWifi(): Observable<Pair<String, String>> {
+    fun openDeviceDownloadDVRMode(): Observable<Pair<String, String>> {
         return Observable.create {
             logger.loggerMessage("打开设备wifi")
             deviceHelper.openDeviceDownloadDVRMode(getOnWifiOpenListener(it))
         }
     }
 
-    fun closeDeviceWifi() {
+    fun closeDeviceDownloadDVRMode() {
         logger.loggerMessage("关闭设备Wi-Fi")
         deviceHelper.closeDeviceDownloadDVRMode()
     }
@@ -686,11 +686,14 @@ class DeviceService(
 
         return Observable.create<Pair<String, String>> {
             deviceHelper.openDeviceUpdateMode(getOnWifiOpenListener(it))
-        }.doOnDispose {
-            deviceHelper.closeDeviceUpdateMode()
-        }.doOnComplete {
-            deviceHelper.closeDeviceUpdateMode()
         }
+    }
+
+    /**
+     * 关闭设备升级模式
+     */
+    fun closeDeviceUpdateMode() {
+        deviceHelper.closeDeviceUpdateMode()
     }
 
 
