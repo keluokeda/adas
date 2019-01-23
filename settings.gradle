@@ -1,6 +1,6 @@
 include ':app', ':adas'
-setBinding(new Binding([gradle: this]))                                 // new
-evaluate(new File(                                                      // new
-        settingsDir.parentFile,                                               // new
-        'flutter_adas/.android/include_flutter.groovy'                          // new
-))
+//setBinding(new Binding([gradle: this]))                                 // new
+//evaluate(new File(                                                      // new
+//        settingsDir.parentFile,                                               // new
+//        'flutter_adas/.android/include_flutter.groovy'                          // new
+//))
