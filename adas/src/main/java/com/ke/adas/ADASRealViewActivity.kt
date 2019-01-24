@@ -91,6 +91,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
         if (!getDeviceService().isConnectedDevice()) {
+            toastMessage("设备蓝牙没有连接")
             finish()
         }
 
@@ -171,6 +172,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 if (!it) {
                     loggerMessage("设备已经断开")
                     Toast.makeText(applicationContext, "蓝牙已断开", Toast.LENGTH_SHORT).show()
+                    toastMessage("设备蓝牙已经断开")
                     finish()
                 }
             }, {
@@ -221,6 +223,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     this.wifiName = it.first
 
                 }, {
+                    toastMessage("开启实况模式失败")
                     handleError(it)
                     finish()
                 }
@@ -265,6 +268,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 //z 后10 上0 前10
             }, {
                 handleError(it)
+                toastMessage("初始化实况模式失败")
                 setResult(RESULT_CANCELED)
                 finish()
             })
@@ -297,6 +301,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     "开启实况模式结果 $it"
                 )
             }, {
+                toastMessage("开始实况模式失败")
                 handleError(it)
                 finish()
             })
@@ -333,5 +338,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         )
     }
 
+
+    private fun toastMessage(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+    }
 
 }
