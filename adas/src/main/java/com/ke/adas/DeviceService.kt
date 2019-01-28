@@ -188,19 +188,28 @@ class DeviceService(
                 }
 
                 override fun onPassworderro() {
+
+
                     logger.loggerMessage("登录设备密码错误")
-                    it.onError(DeviceException(DeviceErrorCode.BLE_LOGIN_PASSWORD_INCORRECT))
+
+                    if (!it.isDisposed) {
+                        it.onError(DeviceException(DeviceErrorCode.BLE_LOGIN_PASSWORD_INCORRECT))
+                    }
                 }
 
                 override fun onNotService() {
                     logger.loggerMessage("登录设备找不到服务")
-                    it.onError(DeviceException(DeviceErrorCode.DEVICE_NOT_FIND_SERVICE))
+                    if (!it.isDisposed) {
+                        it.onError(DeviceException(DeviceErrorCode.DEVICE_NOT_FIND_SERVICE))
+                    }
 
                 }
 
                 override fun onFail(p0: Int) {
                     logger.loggerMessage("登录设备失败 $p0")
-                    it.onError(DeviceException(p0))
+                    if (it.isDisposed) {
+                        it.onError(DeviceException(p0))
+                    }
 
                 }
 

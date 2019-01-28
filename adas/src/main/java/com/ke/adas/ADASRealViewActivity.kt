@@ -214,7 +214,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .openDeviceRealViewMode()
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread()).subscribe(
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
                 {
                     progress_container.visibility = View.GONE
                     layout_connect.visibility = View.VISIBLE
