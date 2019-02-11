@@ -207,7 +207,7 @@ class DeviceService(
 
                 override fun onFail(p0: Int) {
                     logger.loggerMessage("登录设备失败 $p0")
-                    if (it.isDisposed) {
+                    if (!it.isDisposed) {
                         it.onError(DeviceException(p0))
                     }
 
