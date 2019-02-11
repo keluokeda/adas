@@ -640,6 +640,7 @@ class DeviceService(
             deviceHelper.getDeviceVersion(object : GetBleInfoVersionCallback {
                 override fun onSuccess(p0: String, p1: String, p2: String, p3: String, p4: String, p5: String) {
                     it.onNext(Version(p0, p1, p2, p3, p4, p5))
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
