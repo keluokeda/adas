@@ -133,16 +133,6 @@ class DeviceService(
 
 
     /**
-     * 设置音量大小
-     */
-    fun setDeviceVoice(voice: Int): Observable<Boolean> {
-        return Observable.create<Boolean> {
-            deviceHelper.setVoice(voice, getSetDeviceInfoCallback(it))
-        }
-    }
-
-
-    /**
      * 扫描设备
      */
     fun scanDevice(): Observable<Device> {
@@ -588,6 +578,16 @@ class DeviceService(
         }
     }
 
+
+    /**
+     * 设置音量大小
+     */
+    fun setDeviceVoice(voice: Int): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setVoice(voice, getSetDeviceInfoCallback(it))
+        }
+    }
+
     fun getVoice(): Observable<Int> {
         return Observable.create<Int> {
             deviceHelper.getVoice(object : onGetVoiceCallback {
@@ -609,12 +609,16 @@ class DeviceService(
         }
     }
 
-    fun getVoiceType(): Observable<Int> {
+    /**
+     * 获取声音类型
+     */
+    fun getVoiceType(): Observable<VoiceType> {
 
-        return Observable.create<Int> {
+        return Observable.create<VoiceType> {
             deviceHelper.getADASVoiceParam(object : onGetADASVoiceTypeCallback {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
-                    it.onNext(p0)
+                    it.onNext(p0.toVoiceType())
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
@@ -625,8 +629,12 @@ class DeviceService(
         }
     }
 
-    fun setVoiceType(type: Int): Observable<Boolean> {
+    /**
+     * 设置声音类型
+     */
+    fun setVoiceType(voiceType: VoiceType): Observable<Boolean> {
         return Observable.create<Boolean> {
+            val type = voiceType.type
             deviceHelper.setADASVoice(type, type, type, type, getSetDeviceInfoCallback(it))
         }
     }
