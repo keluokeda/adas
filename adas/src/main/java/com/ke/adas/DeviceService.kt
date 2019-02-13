@@ -471,7 +471,7 @@ class DeviceService(
      * 设置hmw时间 6-25
      */
     fun setHMWTime(value: Int): Observable<Boolean> {
-        val time = if (value > 25) 25 else if (value < 8) 8 else value
+        val time = if (value > 25) 25 else if (value < 6) 6 else value
 
         return Observable.create {
             deviceHelper.setHMWTime(time, getSetDeviceInfoCallback(it))
