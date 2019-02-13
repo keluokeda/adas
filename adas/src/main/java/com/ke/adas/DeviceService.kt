@@ -580,6 +580,36 @@ class DeviceService(
 
 
     /**
+     * 获取车辆长宽高
+     */
+    fun getCarPara(): Observable<CarPara> {
+
+        return Observable.create {
+            deviceHelper.getCarPara(object : OnGetDeviceCarInfoListener {
+                override fun onSuccess(p0: Int, p1: Int, p2: Int) {
+                    it.onNext(CarPara(width = p0, height = p1, length = p2))
+                    it.onComplete()
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    /**
+     * 设置车辆长宽高
+     */
+    fun setCarPara(carPara: CarPara): Observable<Boolean> {
+        return Observable.create {
+            deviceHelper.setCarPara(carPara.width, carPara.height, carPara.length, getSetDeviceInfoCallback(it))
+        }
+    }
+
+
+    /**
      * 设置音量大小
      */
     fun setDeviceVoice(voice: Int): Observable<Boolean> {
