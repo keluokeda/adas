@@ -582,12 +582,12 @@ class DeviceService(
     /**
      * 获取车辆长宽高
      */
-    fun getCarPara(): Observable<CarPara> {
+    fun getCarParameter(): Observable<CarParameter> {
 
         return Observable.create {
             deviceHelper.getCarPara(object : OnGetDeviceCarInfoListener {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int) {
-                    it.onNext(CarPara(width = p0, height = p1, length = p2))
+                    it.onNext(CarParameter(width = p0, height = p1, length = p2))
                     it.onComplete()
                 }
 
@@ -602,10 +602,95 @@ class DeviceService(
     /**
      * 设置车辆长宽高
      */
-    fun setCarPara(carPara: CarPara): Observable<Boolean> {
+    fun setCarParameter(carPara: CarParameter): Observable<Boolean> {
         return Observable.create {
             deviceHelper.setCarPara(carPara.width, carPara.height, carPara.length, getSetDeviceInfoCallback(it))
         }
+    }
+
+    /**
+     * 获取摄像头安装参数
+     */
+    fun getCameraParameter(): Observable<CameraParameter> {
+
+        return Observable.create {
+            deviceHelper.getCameraPara(object : OnGetDeviceCameraInfoListener {
+                override fun onSuccess(p0: Int, p1: Int, p2: Int) {
+                    it.onNext(CameraParameter(p0, p1, p2))
+                    it.onComplete()
+                }
+
+                override fun onFail(p0: Int) {
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+
+    /**
+     * 设置摄像头安装参数
+     */
+    fun setCameraParameter(cameraPara: CameraParameter): Observable<Boolean> {
+        return Observable.create {
+            deviceHelper.setCameraPara(
+                cameraPara.center,
+                cameraPara.height,
+                cameraPara.front,
+                getSetDeviceInfoCallback(it)
+            )
+        }
+
+
+    }
+
+
+    /**
+     * 获取标定参数
+     */
+    fun getDeviceParameter(): Observable<DeviceParameter> {
+
+        return getCarParameter().flatMap { carParameter ->
+            val width = carParameter.width
+
+            return@flatMap getCameraParameter().map {
+                return@map DeviceParameter(width = width, center = it.center, height = it.height, front = it.front)
+            }
+        }
+    }
+
+    /**
+     * 设置标定参数
+     */
+    fun setDeviceParameter(deviceParameter: DeviceParameter): Observable<Boolean> {
+
+        return getCarParameter()
+            .flatMap {
+
+                return@flatMap setCarParameter(
+                    CarParameter(
+                        width = deviceParameter.width,
+                        height = it.height,
+                        length = it.length
+                    )
+                )
+            }
+            .flatMap { setCarParameterResult ->
+
+                if (setCarParameterResult) {
+                    return@flatMap setCameraParameter(
+                        CameraParameter(
+                            center = deviceParameter.center,
+                            front = deviceParameter.front,
+                            height = deviceParameter.height
+                        )
+                    )
+                } else {
+                    return@flatMap Observable.just(false)
+                }
+
+            }
     }
 
 
