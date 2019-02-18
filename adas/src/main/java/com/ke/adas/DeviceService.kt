@@ -45,7 +45,7 @@ class DeviceService(
             .create(CheckUpdateService::class.java)
     }
 
-    private val deviceHelper = DeviceHelper()
+    val deviceHelper = DeviceHelper()
 
     private val connectStateSubject = PublishSubject.create<Boolean>()
 
@@ -667,7 +667,6 @@ class DeviceService(
 
         return getCarParameter()
             .flatMap {
-
                 return@flatMap setCarParameter(
                     CarParameter(
                         width = deviceParameter.width,
