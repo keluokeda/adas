@@ -11,12 +11,17 @@ import com.ke.adas.exception.DeviceException
 import interf.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -25,8 +30,33 @@ class DeviceService(
     private val logger: Logger
 ) {
 
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+    private val timeFormat = SimpleDateFormat("HH:mm:ss")
+
+    private val pathFormat = SimpleDateFormat("yyyyMMddHHmmss")
+
     private lateinit var downloadedVideoRepository: DownloadedVideoRepository
     private val checkUpdateService: CheckUpdateService
+
+
+    private val allVideoListSubject: Subject<List<DeviceVideo>> = BehaviorSubject.create()
+    private val allVideoList = mutableListOf<DeviceVideo>()
+
+    private val collisionVideoListSubject: Subject<List<DeviceVideo>> = BehaviorSubject.create()
+    private val collisionVideoList = mutableListOf<DeviceVideo>()
+
+    private val alarmVideoListSubject: Subject<List<DeviceVideo>> = BehaviorSubject.create()
+    private val alarmVideoList = mutableListOf<DeviceVideo>()
+
+
+    private var allDownloadedVideoList = emptyList<DownloadedVideo>()
+
+    private var collisionDownloadedVideoList = emptyList<DownloadedVideo>()
+
+    private var alarmDownloadedVideoList = emptyList<DownloadedVideo>()
+
+    private val compositeDisposable = CompositeDisposable()
+
 
     init {
         val baseUrl = "http://server.vispect.net:8080/"
@@ -62,6 +92,21 @@ class DeviceService(
         this.context = context.applicationContext
 
         downloadedVideoRepository = DownloadedVideoRepository(this.context)
+
+
+
+        downloadedVideoRepository.allVideoListObservable.subscribe {
+            allDownloadedVideoList = it
+        }.addTo(compositeDisposable)
+
+        downloadedVideoRepository.collisionVideoListObservable.subscribe {
+            collisionDownloadedVideoList = it
+        }
+            .addTo(compositeDisposable)
+
+        downloadedVideoRepository.alarmVideoListObservable.subscribe {
+            alarmDownloadedVideoList = it
+        }.addTo(compositeDisposable)
 
 
         val o = Observable.create<Boolean> {
@@ -334,66 +379,169 @@ class DeviceService(
 
 
     /**
-     * 获取视频列表
+     * 加载视频列表
      */
-    fun getVideoList(pageNo: Int, pageSize: Int = 100, videoType: VideoType): Observable<List<DeviceVideo>> {
+    fun loadVideoList(pageNo: Int, videoType: VideoType) {
 
-        return Observable.create {
+        val pageSize = 20
 
-            when (videoType) {
-
-                VideoType.All -> deviceHelper.getDVRLists(
-                    pageNo * pageSize,
-                    pageSize,
-                    createDrivingVideoOperationListener(pageNo, it)
-                )
-
-                VideoType.Collision -> deviceHelper.getCollisionVideos(
-                    pageNo * pageSize,
-                    pageSize,
-                    createDrivingVideoOperationListener(pageNo, it)
-                )
-                VideoType.Alarm -> deviceHelper.getADASWarringVideos(
-                    pageNo * pageSize,
-                    pageSize,
-                    createDrivingVideoOperationListener(pageNo, it)
-                )
-            }
-
-
-        }
-    }
-
-    private fun createDrivingVideoOperationListener(
-        pageNo: Int,
-        it: ObservableEmitter<List<DeviceVideo>>
-    ): DrivingVideoOperationListener {
-        return object : DrivingVideoOperationListener {
+        val callback = object : DrivingVideoOperationListener {
             override fun onLockOrUnlockResult(p0: Boolean) {
 
             }
 
             override fun onGetVideoList(p0: ArrayList<*>) {
-                logger.loggerMessage("onGetVideoList $pageNo $p0")
-
-
                 val list = p0.map { any ->
                     any as DVRInfo
                 }
                     .map { info ->
-                        info.toDeviceVideo()
+                        convertToDeviceVideo(info, videoType)
                     }
-                it.onNext(list)
+
+                addVideoListToList(list, videoType, pageNo)
             }
 
             override fun onLast() {
-
-                logger.loggerMessage("getVideoList $pageNo onLast")
-                it.onNext(emptyList())
+                addVideoListToList(emptyList(), videoType, pageNo)
             }
 
         }
+
+        when (videoType) {
+
+            VideoType.All -> deviceHelper.getDVRLists(
+                pageNo * pageSize,
+                pageSize,
+                callback
+            )
+
+            VideoType.Collision -> deviceHelper.getCollisionVideos(
+                pageNo * pageSize,
+                pageSize,
+                callback
+            )
+            VideoType.Alarm -> deviceHelper.getADASWarringVideos(
+                pageNo * pageSize,
+                pageSize,
+                callback
+            )
+        }
+
     }
+
+
+    private fun convertToDeviceVideo(dvrInfo: DVRInfo, videoType: VideoType): DeviceVideo {
+        val date = pathFormat.parse(dvrInfo.name)
+
+
+        val videoList = when (videoType) {
+
+            VideoType.All -> allDownloadedVideoList
+            VideoType.Collision -> collisionDownloadedVideoList
+            VideoType.Alarm -> alarmDownloadedVideoList
+        }
+
+        return DeviceVideo(
+            name = dvrInfo.name,
+            date = dateFormat.format(date),
+            time = timeFormat.format(date),
+            downloaded = videoList.map { it.name }.contains(dvrInfo.name),
+            path = null,
+            progress = 0,
+            downloading = false
+        )
+    }
+
+    private fun addVideoListToList(list: List<DeviceVideo>, videoType: VideoType, pageNo: Int) {
+        when (videoType) {
+
+            VideoType.All -> {
+                if (pageNo == 0) {
+                    allVideoList.clear()
+                }
+                allVideoList.addAll(list)
+                allVideoListSubject.onNext(allVideoList)
+            }
+            VideoType.Collision -> {
+                if (pageNo == 0) {
+                    collisionVideoList.clear()
+                }
+                collisionVideoList.addAll(list)
+                collisionVideoListSubject.onNext(collisionVideoList)
+            }
+            VideoType.Alarm -> {
+                if (pageNo == 0) {
+                    alarmVideoList.clear()
+                }
+                alarmVideoList.addAll(list)
+                alarmVideoListSubject.onNext(alarmVideoList)
+            }
+        }
+
+
+    }
+
+//    /**
+//     * 获取视频列表
+//     */
+//    fun getVideoList(pageNo: Int, pageSize: Int = 100, videoType: VideoType): Observable<List<DeviceVideo>> {
+//
+//        return Observable.create {
+//
+//            when (videoType) {
+//
+//                VideoType.All -> deviceHelper.getDVRLists(
+//                    pageNo * pageSize,
+//                    pageSize,
+//                    createDrivingVideoOperationListener(pageNo, it)
+//                )
+//
+//                VideoType.Collision -> deviceHelper.getCollisionVideos(
+//                    pageNo * pageSize,
+//                    pageSize,
+//                    createDrivingVideoOperationListener(pageNo, it)
+//                )
+//                VideoType.Alarm -> deviceHelper.getADASWarringVideos(
+//                    pageNo * pageSize,
+//                    pageSize,
+//                    createDrivingVideoOperationListener(pageNo, it)
+//                )
+//            }
+//
+//
+//        }
+//    }
+//
+//    private fun createDrivingVideoOperationListener(
+//        pageNo: Int,
+//        it: ObservableEmitter<List<DeviceVideo>>
+//    ): DrivingVideoOperationListener {
+//        return object : DrivingVideoOperationListener {
+//            override fun onLockOrUnlockResult(p0: Boolean) {
+//
+//            }
+//
+//            override fun onGetVideoList(p0: ArrayList<*>) {
+//                logger.loggerMessage("onGetVideoList $pageNo $p0")
+//
+//
+//                val list = p0.map { any ->
+//                    any as DVRInfo
+//                }
+//                    .map { info ->
+//                        info.toDeviceVideo()
+//                    }
+//                it.onNext(list)
+//            }
+//
+//            override fun onLast() {
+//
+//                logger.loggerMessage("getVideoList $pageNo onLast")
+//                it.onNext(emptyList())
+//            }
+//
+//        }
+//    }
 
 
     /**
@@ -410,48 +558,150 @@ class DeviceService(
     /**
      * 删除已经下载的视频
      */
-    fun deleteDownloadedVideo(videoType: VideoType, path: String) = when (videoType) {
+    fun deleteDownloadedVideo(videoType: VideoType, deviceVideo: DeviceVideo): Boolean {
 
-        VideoType.All -> downloadedVideoRepository.deleteVideo(path)
-        VideoType.Collision -> downloadedVideoRepository.deleteCollisionVideo(path)
-        VideoType.Alarm -> downloadedVideoRepository.deleteAlarmVideo(path)
+        val videoPath = deviceVideo.path ?: return false
+
+        val result = when (videoType) {
+
+            VideoType.All -> downloadedVideoRepository.deleteVideo(videoPath)
+            VideoType.Collision -> downloadedVideoRepository.deleteCollisionVideo(videoPath)
+            VideoType.Alarm -> downloadedVideoRepository.deleteAlarmVideo(videoPath)
+        }
+        if (result) {
+            //如果删除成功 更新对应的视频数据
+
+            val videoList = when (videoType) {
+
+                VideoType.All -> allVideoList
+                VideoType.Collision -> collisionVideoList
+                VideoType.Alarm -> alarmVideoList
+            }
+
+
+//            val deletedVideo = videoList.find { it.name == deviceVideo.name }
+
+            val index = videoList.indexOf(deviceVideo)
+
+            if (index != -1) {
+                videoList[index] = deviceVideo.onDelete()
+
+                when (videoType) {
+                    VideoType.All -> allVideoListSubject
+                    VideoType.Collision -> collisionVideoListSubject
+                    VideoType.Alarm -> alarmVideoListSubject
+                }.onNext(videoList)
+
+            }
+
+        }
+
+        return result
     }
 
     /**
      * 下载视频
      */
-    fun downloadVideo(videoName: String, videoType: VideoType): Observable<DownloadVideoInfo> {
-        return Observable.create {
-            logger.loggerMessage("开始下载视频 视频名称 $videoName")
-            deviceHelper.downloadDVR(videoName, object : ProgressCallback {
-                override fun onDone(path: String, md5: String) {
-                    val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
+    fun downloadVideo(videoName: String, videoType: VideoType) {
+        logger.loggerMessage("开始下载视频 视频名称 $videoName")
 
-                    logger.loggerMessage("下载视频完成 $downloadVideoInfo")
 
-                    when (videoType) {
+        onVideoStartDownload(videoType, videoName)
 
-                        VideoType.All -> downloadedVideoRepository.onVideoDownloaded(path)
-                        VideoType.Collision -> downloadedVideoRepository.onCollisionVideoDownloaded(path)
-                        VideoType.Alarm -> downloadedVideoRepository.onAlarmVideoDownloaded(path)
+
+        deviceHelper.downloadDVR(videoName, object : ProgressCallback {
+            override fun onDone(path: String, md5: String) {
+                val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
+
+                logger.loggerMessage("下载视频完成 $downloadVideoInfo")
+
+                val pair = when (videoType) {
+                    VideoType.All -> {
+                        downloadedVideoRepository.onVideoDownloaded(path)
+                        allVideoList to allVideoListSubject
                     }
-
-                    it.onNext(downloadVideoInfo)
-                    it.onComplete()
+                    VideoType.Collision -> {
+                        downloadedVideoRepository.onCollisionVideoDownloaded(path)
+                        collisionVideoList to collisionVideoListSubject
+                    }
+                    VideoType.Alarm -> {
+                        downloadedVideoRepository.onAlarmVideoDownloaded(path)
+                        alarmVideoList to allVideoListSubject
+                    }
                 }
 
-                override fun onProgressChange(p0: Long) {
-                    it.onNext(DownloadVideoInfo(videoName = videoName, progress = p0))
+
+                val deviceVideo = pair.first.find { it.name == videoName }
+
+                if (deviceVideo != null) {
+
+                    //更新数据
+                    pair.first[pair.first.indexOf(deviceVideo)] = deviceVideo.onDownloaded(path)
+                    //发布更新
+                    pair.second.onNext(pair.first)
                 }
 
-                override fun onErro(p0: Int) {
-                    logger.loggerMessage("下载视频失败 视频名称 $videoName")
-                    it.onError(DeviceException(p0))
+
+            }
+
+            override fun onProgressChange(progress: Long) {
+
+                val pair = when (videoType) {
+                    VideoType.All -> {
+                        allVideoList to allVideoListSubject
+                    }
+                    VideoType.Collision -> {
+                        collisionVideoList to collisionVideoListSubject
+                    }
+                    VideoType.Alarm -> {
+                        alarmVideoList to allVideoListSubject
+                    }
                 }
 
-            })
+
+                val deviceVideo = pair.first.find { it.name == videoName }
+
+                if (deviceVideo != null) {
+
+                    //更新数据
+                    pair.first[pair.first.indexOf(deviceVideo)] = deviceVideo.onProgressChange(progress.toInt())
+                    //发布更新
+                    pair.second.onNext(pair.first)
+                }
+            }
+
+            override fun onErro(p0: Int) {
+
+            }
+
+        })
+    }
+
+    private fun onVideoStartDownload(videoType: VideoType, videoName: String) {
+        val pair = when (videoType) {
+            VideoType.All -> {
+                allVideoList to allVideoListSubject
+            }
+            VideoType.Collision -> {
+                collisionVideoList to collisionVideoListSubject
+            }
+            VideoType.Alarm -> {
+                alarmVideoList to allVideoListSubject
+            }
+        }
+
+
+        val deviceVideo = pair.first.find { it.name == videoName }
+
+        if (deviceVideo != null) {
+
+            //更新数据
+            pair.first[pair.first.indexOf(deviceVideo)] = deviceVideo.onStartDownload()
+            //发布更新
+            pair.second.onNext(pair.first)
         }
     }
+
 
     /**
      * 获取下载视频的目录
@@ -969,10 +1219,3 @@ class DeviceService(
 
 }
 
-fun DVRInfo.toDeviceVideo(): DeviceVideo {
-    return DeviceVideo(
-        name = name,
-        lock = "0" != state,
-        state = state
-    )
-}
