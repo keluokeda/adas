@@ -64,6 +64,17 @@ class DeviceService(
 
     val alarmVideoListObservable: Observable<List<DeviceVideo>> = alarmVideoListSubject
 
+    val allDownloadVideoListObservable: Observable<List<DownloadedVideo>>
+        get() = downloadedVideoRepository.allVideoListObservable
+
+
+    val collisionDownloadVideoListObservable: Observable<List<DownloadedVideo>>
+        get() = downloadedVideoRepository.collisionVideoListObservable
+
+
+    val alarmDownloadVideoListObservable: Observable<List<DownloadedVideo>>
+        get() = downloadedVideoRepository.alarmVideoListObservable
+
 
     init {
         val baseUrl = "http://server.vispect.net:8080/"
