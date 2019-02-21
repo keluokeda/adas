@@ -130,7 +130,7 @@ internal class DownloadedVideoRepository(applicationContext: Context) {
     private fun pathToDownloadedVideo(path: String): DownloadedVideo {
         val file = File(path)
         val name = file.name.replace(".mp4", "")
-        val date = pathFormat.parse(path)
+        val date = pathFormat.parse(name)
 
         return DownloadedVideo(path = path, name = name, date = dateFormat.format(date), time = timeFormat.format(date))
     }
