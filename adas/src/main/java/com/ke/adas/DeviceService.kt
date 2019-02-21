@@ -39,6 +39,8 @@ class DeviceService(
     private val checkUpdateService: CheckUpdateService
 
 
+//    private val loadVideoListSubject: Subject<Pair<Int, DeviceVideo>> = PublishSubject.create()
+
     private val allVideoListSubject: Subject<List<DeviceVideo>> = BehaviorSubject.create()
     private val allVideoList = mutableListOf<DeviceVideo>()
 
@@ -92,6 +94,8 @@ class DeviceService(
             .baseUrl(baseUrl)
             .build()
             .create(CheckUpdateService::class.java)
+
+
     }
 
     private val deviceHelper = DeviceHelper()
@@ -409,51 +413,102 @@ class DeviceService(
 
             val pageSize = 20
 
-            val callback = object : DrivingVideoOperationListener {
-                override fun onLockOrUnlockResult(p0: Boolean) {
 
-                }
-
-                override fun onGetVideoList(p0: ArrayList<*>) {
-                    val list = p0.map { any ->
-                        any as DVRInfo
-                    }
-                        .map { info ->
-                            convertToDeviceVideo(info, videoType)
-                        }
-
-                    addVideoListToList(list, videoType, pageNo)
-                    logger.loggerMessage("成功获取到视频 ${list.size} pageNo = $pageNo videoType = $videoType")
-
-                    it.onNext(true)
-                }
-
-                override fun onLast() {
-                    logger.loggerMessage("没有发现任何视频数据 pageNo = $pageNo videoType = $videoType")
-
-                    addVideoListToList(emptyList(), videoType, pageNo)
-                    it.onNext(false)
-                }
-
-            }
 
             when (videoType) {
 
                 VideoType.All -> deviceHelper.getDVRLists(
                     pageNo * pageSize,
                     pageSize,
-                    callback
+                    object : DrivingVideoOperationListener {
+                        override fun onLockOrUnlockResult(p0: Boolean) {
+
+                        }
+
+                        override fun onGetVideoList(p0: ArrayList<*>) {
+                            val list = p0.map { any ->
+                                any as DVRInfo
+                            }
+                                .map { info ->
+                                    convertToDeviceVideo(info, videoType)
+                                }
+
+                            addVideoListToList(list, videoType, pageNo)
+                            logger.loggerMessage("成功获取到视频 ${list.size} pageNo = $pageNo videoType = $videoType")
+
+                            it.onNext(true)
+                        }
+
+                        override fun onLast() {
+                            logger.loggerMessage("没有发现任何视频数据 pageNo = $pageNo videoType = $videoType")
+
+                            addVideoListToList(emptyList(), videoType, pageNo)
+                            it.onNext(false)
+                        }
+
+                    }
                 )
 
                 VideoType.Collision -> deviceHelper.getCollisionVideos(
                     pageNo * pageSize,
                     pageSize,
-                    callback
+                    object : CollosionVideoOperationListener {
+                        override fun onLockOrUnlockResult(p0: Boolean) {
+                        }
+
+                        override fun onGetVideoList(p0: ArrayList<*>) {
+                            val list = p0.map { any ->
+                                any as DVRInfo
+                            }
+                                .map { info ->
+                                    convertToDeviceVideo(info, videoType)
+                                }
+
+                            addVideoListToList(list, videoType, pageNo)
+                            logger.loggerMessage("成功获取到视频 ${list.size} pageNo = $pageNo videoType = $videoType")
+
+                            it.onNext(true)
+                        }
+
+                        override fun onLast() {
+                            logger.loggerMessage("没有发现任何视频数据 pageNo = $pageNo videoType = $videoType")
+
+                            addVideoListToList(emptyList(), videoType, pageNo)
+                            it.onNext(false)
+                        }
+
+                    }
                 )
                 VideoType.Alarm -> deviceHelper.getADASWarringVideos(
                     pageNo * pageSize,
                     pageSize,
-                    callback
+                    object : WarringVideoOperationListener {
+                        override fun onLockOrUnlockResult(p0: Boolean) {
+
+                        }
+
+                        override fun onGetVideoList(p0: ArrayList<*>) {
+                            val list = p0.map { any ->
+                                any as DVRInfo
+                            }
+                                .map { info ->
+                                    convertToDeviceVideo(info, videoType)
+                                }
+
+                            addVideoListToList(list, videoType, pageNo)
+                            logger.loggerMessage("成功获取到视频 ${list.size} pageNo = $pageNo videoType = $videoType")
+
+                            it.onNext(true)
+                        }
+
+                        override fun onLast() {
+                            logger.loggerMessage("没有发现任何视频数据 pageNo = $pageNo videoType = $videoType")
+
+                            addVideoListToList(emptyList(), videoType, pageNo)
+                            it.onNext(false)
+                        }
+
+                    }
                 )
             }
         }
@@ -797,7 +852,7 @@ class DeviceService(
 
         return Observable.create<DeviceSensitivityLevel> {
             logger.loggerMessage("开始获取报警灵敏度")
-            deviceHelper.getADASSensitivityLevel(object : GetADASInfoCallback {
+            deviceHelper.getADASSensitivityLevel(object : GetADASSensitivityCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
                     logger.loggerMessage("获取报警灵敏度成功")
                     it.onNext(DeviceSensitivityLevel(p0, p1, p2))
