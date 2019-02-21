@@ -404,6 +404,9 @@ class DeviceService(
 
         return Observable.create {
 
+
+            logger.loggerMessage("开始加载视频 pageNo = $pageNo videoType = $videoType")
+
             val pageSize = 20
 
             val callback = object : DrivingVideoOperationListener {
@@ -420,10 +423,14 @@ class DeviceService(
                         }
 
                     addVideoListToList(list, videoType, pageNo)
+                    logger.loggerMessage("成功获取到视频 ${list.size} pageNo = $pageNo videoType = $videoType")
+
                     it.onNext(true)
                 }
 
                 override fun onLast() {
+                    logger.loggerMessage("没有发现任何视频数据 pageNo = $pageNo videoType = $videoType")
+
                     addVideoListToList(emptyList(), videoType, pageNo)
                     it.onNext(false)
                 }
