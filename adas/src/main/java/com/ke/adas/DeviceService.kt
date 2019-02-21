@@ -58,6 +58,13 @@ class DeviceService(
     private val compositeDisposable = CompositeDisposable()
 
 
+    val allVideoListObservable: Observable<List<DeviceVideo>> = allVideoListSubject
+
+    val collisionVideoListObservable: Observable<List<DeviceVideo>> = collisionVideoListSubject
+
+    val alarmVideoListObservable: Observable<List<DeviceVideo>> = alarmVideoListSubject
+
+
     init {
         val baseUrl = "http://server.vispect.net:8080/"
 
