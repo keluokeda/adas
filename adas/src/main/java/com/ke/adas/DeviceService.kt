@@ -25,6 +25,7 @@ class DeviceService(
     private val logger: Logger
 ) {
 
+    private lateinit var downloadedVideoRepository: DownloadedVideoRepository
     private val checkUpdateService: CheckUpdateService
 
     init {
@@ -45,7 +46,7 @@ class DeviceService(
             .create(CheckUpdateService::class.java)
     }
 
-    val deviceHelper = DeviceHelper()
+    private val deviceHelper = DeviceHelper()
 
     private val connectStateSubject = PublishSubject.create<Boolean>()
 
@@ -58,7 +59,11 @@ class DeviceService(
      * 初始化
      */
     fun init(context: Context, appKey: String): Observable<Boolean> {
-        this.context = context
+        this.context = context.applicationContext
+
+        downloadedVideoRepository = DownloadedVideoRepository(this.context)
+
+
         val o = Observable.create<Boolean> {
             deviceHelper.initSDK(context.applicationContext, appKey, object : Oninit {
                 override fun onSuccess() {
@@ -95,6 +100,7 @@ class DeviceService(
             adasEventSubject.onNext(it)
         }
 
+//        deviceHelper.getADASWarringVideos()
 
 
         return o
@@ -330,33 +336,61 @@ class DeviceService(
     /**
      * 获取视频列表
      */
-    fun getVideoList(pageNo: Int, pageSize: Int = 100): Observable<List<DeviceVideo>> {
+    fun getVideoList(pageNo: Int, pageSize: Int = 100, videoType: VideoType): Observable<List<DeviceVideo>> {
+
         return Observable.create {
-            deviceHelper.getDVRLists(pageNo * pageSize, pageSize, object : DrivingVideoOperationListener {
-                override fun onLockOrUnlockResult(p0: Boolean) {
 
+            when (videoType) {
+
+                VideoType.All -> deviceHelper.getDVRLists(
+                    pageNo * pageSize,
+                    pageSize,
+                    createDrivingVideoOperationListener(pageNo, it)
+                )
+
+                VideoType.Collision -> deviceHelper.getCollisionVideos(
+                    pageNo * pageSize,
+                    pageSize,
+                    createDrivingVideoOperationListener(pageNo, it)
+                )
+                VideoType.Alarm -> deviceHelper.getADASWarringVideos(
+                    pageNo * pageSize,
+                    pageSize,
+                    createDrivingVideoOperationListener(pageNo, it)
+                )
+            }
+
+
+        }
+    }
+
+    private fun createDrivingVideoOperationListener(
+        pageNo: Int,
+        it: ObservableEmitter<List<DeviceVideo>>
+    ): DrivingVideoOperationListener {
+        return object : DrivingVideoOperationListener {
+            override fun onLockOrUnlockResult(p0: Boolean) {
+
+            }
+
+            override fun onGetVideoList(p0: ArrayList<*>) {
+                logger.loggerMessage("onGetVideoList $pageNo $p0")
+
+
+                val list = p0.map { any ->
+                    any as DVRInfo
                 }
-
-                override fun onGetVideoList(p0: ArrayList<*>) {
-                    logger.loggerMessage("onGetVideoList $pageNo $p0")
-
-
-                    val list = p0.map { any ->
-                        any as DVRInfo
+                    .map { info ->
+                        info.toDeviceVideo()
                     }
-                        .map { info ->
-                            info.toDeviceVideo()
-                        }
-                    it.onNext(list)
-                }
+                it.onNext(list)
+            }
 
-                override fun onLast() {
+            override fun onLast() {
 
-                    logger.loggerMessage("getVideoList $pageNo onLast")
-                    it.onNext(emptyList())
-                }
-
-            })
+                logger.loggerMessage("getVideoList $pageNo onLast")
+                it.onNext(emptyList())
+            }
 
         }
     }
@@ -365,14 +399,22 @@ class DeviceService(
     /**
      * 下载视频
      */
-    fun downloadVideo(videoName: String): Observable<DownloadVideoInfo> {
+    fun downloadVideo(videoName: String, videoType: VideoType): Observable<DownloadVideoInfo> {
         return Observable.create {
             logger.loggerMessage("开始下载视频 视频名称 $videoName")
             deviceHelper.downloadDVR(videoName, object : ProgressCallback {
-                override fun onDone(p0: String, p1: String) {
-                    val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = p0, fileMd5 = p1)
+                override fun onDone(path: String, md5: String) {
+                    val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
 
                     logger.loggerMessage("下载视频完成 $downloadVideoInfo")
+
+                    when (videoType) {
+
+                        VideoType.All -> downloadedVideoRepository.onVideoDownloaded(path)
+                        VideoType.Collision -> downloadedVideoRepository.onCollisionVideoDownloaded(path)
+                        VideoType.Alarm -> downloadedVideoRepository.onAlarmVideoDownloaded(path)
+                    }
+
                     it.onNext(downloadVideoInfo)
                     it.onComplete()
                 }
