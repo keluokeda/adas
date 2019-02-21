@@ -397,6 +397,27 @@ class DeviceService(
 
 
     /**
+     * 获取已经下载的视频列表
+     */
+    fun getDownloadedVideoList(videoType: VideoType): Observable<List<DownloadedVideo>> {
+        return when (videoType) {
+            VideoType.All -> downloadedVideoRepository.allVideoListObservable
+            VideoType.Collision -> downloadedVideoRepository.collisionVideoListObservable
+            VideoType.Alarm -> downloadedVideoRepository.alarmVideoListObservable
+        }
+    }
+
+    /**
+     * 删除已经下载的视频
+     */
+    fun deleteDownloadedVideo(videoType: VideoType, path: String) = when (videoType) {
+
+        VideoType.All -> downloadedVideoRepository.deleteVideo(path)
+        VideoType.Collision -> downloadedVideoRepository.deleteCollisionVideo(path)
+        VideoType.Alarm -> downloadedVideoRepository.deleteAlarmVideo(path)
+    }
+
+    /**
      * 下载视频
      */
     fun downloadVideo(videoName: String, videoType: VideoType): Observable<DownloadVideoInfo> {

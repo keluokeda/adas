@@ -75,10 +75,11 @@ internal class DownloadedVideoRepository(applicationContext: Context) {
                     .toList().sortedByDescending { it.name }
 
             }
+        allVideoListSubject.onNext("")
 
 
         collisionVideoListObservable = collisionVideoListSubject
-            .map {path ->
+            .map { path ->
                 val videoSet = collisionVideoSet
 
                 if (path.isEmpty()) {
@@ -98,9 +99,10 @@ internal class DownloadedVideoRepository(applicationContext: Context) {
                     .toList().sortedByDescending { it.name }
 
             }
+        collisionVideoListSubject.onNext("")
 
         alarmVideoListObservable = alarmVideoListSubject
-            .map {path ->
+            .map { path ->
                 val videoSet = alarmVideoSet
 
                 if (path.isEmpty()) {
@@ -120,6 +122,7 @@ internal class DownloadedVideoRepository(applicationContext: Context) {
                     .toList().sortedByDescending { it.name }
 
             }
+        alarmVideoListSubject.onNext("")
 
     }
 
@@ -145,6 +148,42 @@ internal class DownloadedVideoRepository(applicationContext: Context) {
         alarmVideoListSubject.onNext(path)
     }
 
+    fun deleteVideo(path: String): Boolean {
+        val file = File(path)
+
+        val deleteResult = file.delete()
+
+        if (deleteResult) {
+            allVideoListSubject.onNext("")
+        }
+
+        return deleteResult
+
+    }
+
+    fun deleteCollisionVideo(path: String): Boolean {
+        val file = File(path)
+
+        val deleteResult = file.delete()
+
+        if (deleteResult) {
+            collisionVideoListSubject.onNext("")
+        }
+
+        return deleteResult
+    }
+
+    fun deleteAlarmVideo(path: String): Boolean {
+        val file = File(path)
+
+        val deleteResult = file.delete()
+
+        if (deleteResult) {
+            alarmVideoListSubject.onNext("")
+        }
+
+        return deleteResult
+    }
 
     companion object {
         private const val ALL_VIDEO_LIST = "ALL_VIDEO_LIST"
