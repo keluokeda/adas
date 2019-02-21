@@ -388,51 +388,58 @@ class DeviceService(
     /**
      * 加载视频列表
      */
-    fun loadVideoList(pageNo: Int, videoType: VideoType) {
+    fun loadVideoList(pageNo: Int, videoType: VideoType): Observable<Boolean> {
 
-        val pageSize = 20
 
-        val callback = object : DrivingVideoOperationListener {
-            override fun onLockOrUnlockResult(p0: Boolean) {
+        return Observable.create {
 
-            }
+            val pageSize = 20
 
-            override fun onGetVideoList(p0: ArrayList<*>) {
-                val list = p0.map { any ->
-                    any as DVRInfo
+            val callback = object : DrivingVideoOperationListener {
+                override fun onLockOrUnlockResult(p0: Boolean) {
+
                 }
-                    .map { info ->
-                        convertToDeviceVideo(info, videoType)
+
+                override fun onGetVideoList(p0: ArrayList<*>) {
+                    val list = p0.map { any ->
+                        any as DVRInfo
                     }
+                        .map { info ->
+                            convertToDeviceVideo(info, videoType)
+                        }
 
-                addVideoListToList(list, videoType, pageNo)
+                    addVideoListToList(list, videoType, pageNo)
+                    it.onNext(true)
+                }
+
+                override fun onLast() {
+                    addVideoListToList(emptyList(), videoType, pageNo)
+                    it.onNext(false)
+                }
+
             }
 
-            override fun onLast() {
-                addVideoListToList(emptyList(), videoType, pageNo)
+            when (videoType) {
+
+                VideoType.All -> deviceHelper.getDVRLists(
+                    pageNo * pageSize,
+                    pageSize,
+                    callback
+                )
+
+                VideoType.Collision -> deviceHelper.getCollisionVideos(
+                    pageNo * pageSize,
+                    pageSize,
+                    callback
+                )
+                VideoType.Alarm -> deviceHelper.getADASWarringVideos(
+                    pageNo * pageSize,
+                    pageSize,
+                    callback
+                )
             }
-
         }
 
-        when (videoType) {
-
-            VideoType.All -> deviceHelper.getDVRLists(
-                pageNo * pageSize,
-                pageSize,
-                callback
-            )
-
-            VideoType.Collision -> deviceHelper.getCollisionVideos(
-                pageNo * pageSize,
-                pageSize,
-                callback
-            )
-            VideoType.Alarm -> deviceHelper.getADASWarringVideos(
-                pageNo * pageSize,
-                pageSize,
-                callback
-            )
-        }
 
     }
 
