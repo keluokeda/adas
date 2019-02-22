@@ -645,9 +645,9 @@ class DeviceService(
     /**
      * 删除已经下载的视频
      */
-    fun deleteDownloadedVideo(videoType: VideoType, deviceVideo: DeviceVideo): Boolean {
+    fun deleteDownloadedVideo(videoType: VideoType, downloadedVideo: DownloadedVideo): Boolean {
 
-        val videoPath = deviceVideo.path ?: return false
+        val videoPath = downloadedVideo.path
 
         val result = when (videoType) {
 
@@ -668,9 +668,10 @@ class DeviceService(
 
 //            val deletedVideo = videoList.find { it.name == deviceVideo.name }
 
-            val index = videoList.indexOf(deviceVideo)
+            val deviceVideo = videoList.find { videoPath == it.path }
 
-            if (index != -1) {
+            if (deviceVideo != null) {
+                val index = videoList.indexOf(deviceVideo)
                 videoList[index] = deviceVideo.onDelete()
 
                 when (videoType) {
@@ -680,6 +681,7 @@ class DeviceService(
                 }.onNext(videoList)
 
             }
+
 
         }
 
