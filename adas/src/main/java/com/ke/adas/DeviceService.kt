@@ -690,13 +690,14 @@ class DeviceService(
      * 下载视频
      */
     fun downloadVideo(videoName: String, videoType: VideoType) {
-        logger.loggerMessage("开始下载视频 视频名称 $videoName")
+        logger.loggerMessage("开始下载视频 视频名称 $videoName 视频类型 $videoType")
+
 
 
         onVideoStartDownload(videoType, videoName)
 
 
-        deviceHelper.downloadDVR(videoName, object : ProgressCallback {
+        val callback = object : ProgressCallback {
             override fun onDone(path: String, md5: String) {
                 val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
 
@@ -761,7 +762,14 @@ class DeviceService(
 
             }
 
-        })
+        }
+
+        when (videoType) {
+            VideoType.All -> deviceHelper.downloadDVR(videoName, callback)
+            VideoType.Collision -> deviceHelper.downCollisionMultiMediaFile(0, videoName, callback)
+            VideoType.Alarm -> deviceHelper.downADASWarringVideoFile(2, videoName, callback)
+        }
+
     }
 
     private fun onVideoStartDownload(videoType: VideoType, videoName: String) {
