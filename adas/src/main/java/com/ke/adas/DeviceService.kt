@@ -528,12 +528,14 @@ class DeviceService(
             VideoType.Alarm -> alarmDownloadedVideoList
         }
 
+        val downloadedVideo = videoList.find { it.name == dvrInfo.name }
+
         return DeviceVideo(
             name = dvrInfo.name,
             date = dateFormat.format(date),
             time = timeFormat.format(date),
-            downloaded = videoList.map { it.name }.contains(dvrInfo.name),
-            path = null,
+            downloaded = downloadedVideo != null,
+            path = downloadedVideo?.path,
             progress = 0,
             downloading = false
         )
