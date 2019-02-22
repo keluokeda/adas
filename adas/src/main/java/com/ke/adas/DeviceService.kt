@@ -714,7 +714,7 @@ class DeviceService(
                     }
                     VideoType.Alarm -> {
                         downloadedVideoRepository.onAlarmVideoDownloaded(path)
-                        alarmVideoList to allVideoListSubject
+                        alarmVideoList to alarmVideoListSubject
                     }
                 }
 
