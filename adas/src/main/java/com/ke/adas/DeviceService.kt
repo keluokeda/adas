@@ -399,6 +399,28 @@ class DeviceService(
 
     }
 
+    /**
+     * 获取通讯板版本号
+     */
+    fun getConnectionBoardVersion(): Observable<String> {
+        return Observable.create {
+            logger.loggerMessage("开始获取通讯板版本号")
+            deviceHelper.getCommuBoardVersion(object : GetNetVersionCallback {
+                override fun onSuccess(p0: String, p1: String) {
+                    logger.loggerMessage("获取通讯板版本号成功 $p0 $p1")
+                    it.onNext(p0)
+                    it.onComplete()
+                }
+
+                override fun onFail(p0: Int) {
+                    logger.loggerMessage("获取通讯板版本号失败")
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
 
     /**
      * 加载视频列表

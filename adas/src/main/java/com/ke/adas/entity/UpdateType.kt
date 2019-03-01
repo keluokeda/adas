@@ -6,7 +6,11 @@ import android.os.Parcelable
 enum class UpdateType(val type: Int) : Parcelable {
     Hardware(1),
     Obd(9),
-    App(10);
+    App(10),
+    /**
+     * 通讯板
+     */
+    ConnectionBoard(13);
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(type)

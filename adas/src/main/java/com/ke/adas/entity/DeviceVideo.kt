@@ -38,7 +38,7 @@ data class DeviceVideo(
      */
     fun onDelete(): DeviceVideo {
         return DeviceVideo(
-            name, date, time, false, path, progress, downloading
+            name, date, time, false, null, progress, downloading
         )
     }
 
