@@ -423,6 +423,17 @@ class DeviceService(
 
 
     /**
+     * 上传通讯板升级文件
+     */
+    fun uploadConnectionBoardUpdateFile(path: String): Observable<Int> {
+
+        return Observable.create {
+            deviceHelper.uploadNETUpdataFile(path, createProgressCallback(it))
+        }
+    }
+
+
+    /**
      * 加载视频列表
      */
     fun loadVideoList(pageNo: Int, videoType: VideoType): Observable<Boolean> {
