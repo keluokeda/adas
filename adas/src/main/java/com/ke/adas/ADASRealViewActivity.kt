@@ -82,6 +82,14 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (isDeviceWifiConnected()) {
+            emitter.onSuccess(true)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

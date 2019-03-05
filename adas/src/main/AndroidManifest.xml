@@ -19,9 +19,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application>
-        <activity android:name=".FlutterActivity">
-        </activity>
-        <!-- device component -->
+
         <service
                 android:name="service.Vispect_SDK_BleService"
                 android:enabled="true"/>
