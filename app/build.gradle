@@ -15,7 +15,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters  'armeabi-v7a'
+            abiFilters 'armeabi-v7a'
 
         }
     }
@@ -25,7 +25,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             ndk {
-                abiFilters  'armeabi-v7a'
+                abiFilters 'armeabi-v7a'
 
             }
         }
@@ -35,7 +35,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             ndk {
-                abiFilters  'armeabi-v7a'
+                abiFilters 'armeabi-v7a'
 
             }
         }
@@ -58,4 +58,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
+    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
+
+    //logger
+    implementation 'com.orhanobut:logger:2.1.1'
+
 }

@@ -9,10 +9,10 @@
 
 
     <Button
-            android:text="Scan"
-            android:layout_width="wrap_content"
+            android:text="测试同时获取多个视频"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/button"
+            android:id="@+id/video_test"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp"
             app:layout_constraintStart_toStartOf="parent"
