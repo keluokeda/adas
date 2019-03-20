@@ -1302,10 +1302,17 @@ class DeviceService(
             }
 
             override fun onProgressChange(p0: Long) {
+
+                if(observableEmitter.isDisposed){
+                    return
+                }
                 observableEmitter.onNext(p0.toInt())
             }
 
             override fun onErro(p0: Int) {
+                if(observableEmitter.isDisposed){
+                    return
+                }
                 observableEmitter.onError(DeviceException(p0))
             }
 
