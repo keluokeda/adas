@@ -100,7 +100,7 @@ class DeviceService(
 
     private val deviceHelper = DeviceHelper()
 
-    private val connectStateSubject = PublishSubject.create<Boolean>()
+    private val connectStateSubject = BehaviorSubject.create<Boolean>()
 
     private val adasEventSubject = PublishSubject.create<Int>()
 
@@ -1298,6 +1298,9 @@ class DeviceService(
 
         return object : ProgressCallback {
             override fun onDone(p0: String, p1: String) {
+                if(observableEmitter.isDisposed){
+                    return
+                }
                 observableEmitter.onComplete()
             }
 
