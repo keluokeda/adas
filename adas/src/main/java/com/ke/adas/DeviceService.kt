@@ -1,6 +1,7 @@
 package com.ke.adas
 
 import android.content.Context
+import android.graphics.Point
 import android.net.wifi.WifiManager
 import bean.BLEDevice
 import bean.DVRInfo
@@ -293,25 +294,25 @@ class DeviceService(
 
     private fun getRealViewCallback(e: ObservableEmitter<RealViewEntity>): RealViewCallback {
         return object : RealViewCallback {
+            override fun onGetSideRecInfo(p0: ArrayList<SideAlarmEvent>?) {
+
+            }
+
+            override fun onGetDSMAlarmInfo(p0: MutableMap<Int, MutableList<Point>>?) {
+            }
+
             override fun onGetPixData(bytes: ByteArray, i: Int) {
                 e.onNext(RealViewEntity(bytes, i))
             }
 
-            override fun onGetADASRecInfo(arrayList: ArrayList<*>) {
+            override fun onGetADASRecInfo(arrayList: ArrayList<DrawShape>) {
                 val list = arrayList.map {
-                    it as DrawShape
+                    it
                 }
 
                 e.onNext(RealViewEntity(list))
             }
 
-            override fun onGetSideRecInfo(arrayList: ArrayList<*>) {
-
-            }
-
-            override fun onGetDSMAlarmInfo(map: Map<*, *>) {
-
-            }
 
             override fun onGetSensorData(x: Float, y: Float, z: Float) {
                 e.onNext(RealViewEntity(x, y, z))
@@ -344,8 +345,8 @@ class DeviceService(
     /**
      * 打开设备实况模式 1
      */
-    fun openDeviceRealViewMode(): Observable<kotlin.Pair<String, String>> {
-        return Observable.create<kotlin.Pair<String, String>> {
+    fun openDeviceRealViewMode(): Observable<Pair<String, String>> {
+        return Observable.create<Pair<String, String>> {
             logger.loggerMessage("打开设备实况模式")
             deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
         }
@@ -458,9 +459,9 @@ class DeviceService(
 
                         }
 
-                        override fun onGetVideoList(p0: ArrayList<*>) {
+                        override fun onGetVideoList(p0: ArrayList<DVRInfo>) {
                             val list = p0.map { any ->
-                                any as DVRInfo
+                                any
                             }
                                 .map { info ->
                                     convertToDeviceVideo(info, videoType)
@@ -489,9 +490,9 @@ class DeviceService(
                         override fun onLockOrUnlockResult(p0: Boolean) {
                         }
 
-                        override fun onGetVideoList(p0: ArrayList<*>) {
+                        override fun onGetVideoList(p0: ArrayList<DVRInfo>) {
                             val list = p0.map { any ->
-                                any as DVRInfo
+                                any
                             }
                                 .map { info ->
                                     convertToDeviceVideo(info, videoType)
@@ -520,11 +521,9 @@ class DeviceService(
 
                         }
 
-                        override fun onGetVideoList(p0: ArrayList<*>) {
-                            val list = p0.map { any ->
-                                any as DVRInfo
-                            }
-                                .map { info ->
+                        override fun onGetVideoList(p0: ArrayList<DVRInfo>) {
+                            val list =
+                                p0.map { info ->
                                     convertToDeviceVideo(info, videoType)
                                 }
 
@@ -847,6 +846,8 @@ class DeviceService(
      * 设置设备wifi密码
      */
     fun setDeviceWifiPassword(password: String): Observable<Boolean> {
+//        deviceHelper.getHasUpdate()
+
         return Observable.create<Boolean> {
             deviceHelper.setDeviceWifiPassword(password, getSetDeviceInfoCallback(it))
         }
@@ -1222,6 +1223,7 @@ class DeviceService(
     /**
      * 获取更新信息
      */
+    @Deprecated(message = "放弃使用")
     fun getUpdateMessage(
         updateType: UpdateType,
         obdVersion: String,
@@ -1241,6 +1243,39 @@ class DeviceService(
                 return@onErrorReturn CheckUpdateResult(result = 110, message = null)
             }
 
+    }
+
+
+    /**
+     *获取升级信息
+     */
+    fun getUpdateMessage(type: Int): Observable<CheckUpdateResult> {
+
+        return Observable.just(1)
+            .observeOn(Schedulers.io())
+            .map {
+                val updateFile = deviceHelper.getHasUpdate(type)
+
+                if (updateFile == null)
+                    CheckUpdateResult(result = 110, message = null)
+                else
+                    CheckUpdateResult(
+                        result = 0, message = UpdateMessage(
+                            path = updateFile.path,
+                            fileName = updateFile.filename,
+                            length = updateFile.length,
+                            versionCode = updateFile.versioncode,
+                            versionName = updateFile.versionname,
+                            md5 = updateFile.md5
+                        )
+                    )
+
+            }
+            .onErrorReturn { throwable ->
+
+                logger.loggerMessage(throwable.message ?: "出错了")
+                return@onErrorReturn CheckUpdateResult(result = 110, message = null)
+            }
     }
 
 
@@ -1298,7 +1333,7 @@ class DeviceService(
 
         return object : ProgressCallback {
             override fun onDone(p0: String, p1: String) {
-                if(observableEmitter.isDisposed){
+                if (observableEmitter.isDisposed) {
                     return
                 }
                 observableEmitter.onComplete()
@@ -1306,14 +1341,14 @@ class DeviceService(
 
             override fun onProgressChange(p0: Long) {
 
-                if(observableEmitter.isDisposed){
+                if (observableEmitter.isDisposed) {
                     return
                 }
                 observableEmitter.onNext(p0.toInt())
             }
 
             override fun onErro(p0: Int) {
-                if(observableEmitter.isDisposed){
+                if (observableEmitter.isDisposed) {
                     return
                 }
                 observableEmitter.onError(DeviceException(p0))
