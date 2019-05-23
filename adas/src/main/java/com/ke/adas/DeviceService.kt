@@ -239,6 +239,13 @@ class DeviceService(
     }
 
     /**
+     * 停止扫描设备
+     */
+    fun stopScanDevice() {
+        deviceHelper.stopScanDevice()
+    }
+
+    /**
      * 登录设备
      */
     fun loginDevice(device: Device): Observable<Boolean> {
