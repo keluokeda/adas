@@ -32,6 +32,3 @@ class App : Application() {
 
 }
 
-fun String.log() {
-    Logger.d(this)
-}

@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager
 import bean.BLEDevice
 import bean.DVRInfo
 import bean.DrawShape
+import bean.OBDAutoCrackElement
 import com.example.vispect_blesdk.DeviceHelper
 import com.ke.adas.entity.*
 import com.ke.adas.exception.DeviceException
@@ -864,6 +865,8 @@ class DeviceService(
      * 获取设备wifi信息
      */
     fun getDeviceWifiInfo(): Observable<Pair<String, String>> {
+
+
         return Observable.create<Pair<String, String>> {
             deviceHelper.getDeviceWifiNameAndPassword(getOnWifiOpenListener(it))
         }
@@ -1334,6 +1337,193 @@ class DeviceService(
         return Observable.create {
             deviceHelper.deviceOTAUpdate(path, createProgressCallback(it))
         }
+    }
+
+
+    /**
+     * 清除OBD故障码
+     */
+    fun clearOBDErrorCode(): Observable<Boolean> {
+
+        return Observable.create {
+            deviceHelper.clearOBDErrorcode(object : SetOBDCrackDataCallback {
+                override fun onSuccess() {
+                    if (!it.isDisposed) {
+                        it.onNext(true)
+                    }
+                }
+
+                override fun onFail(p0: Int) {
+                    if (!it.isDisposed) {
+                        it.onNext(false)
+                    }
+                }
+
+            })
+        }
+
+
+    }
+
+
+    /**
+     * 开始获取obd数据表
+     * @param time 需要的时间，单位毫秒
+     */
+    fun startGetAllCANDataList(time: Long = 13000): Observable<Any> {
+
+
+        return Observable.create { emitter ->
+
+            deviceHelper.startGetAllCANDataList(time, object : OBDAutoCrackCallback {
+                override fun onCrackFailed() {
+                    logger.loggerMessage("onCrackFailed")
+
+
+                }
+
+                override fun onStageResult(p0: Int, p1: MutableMap<String, ArrayList<OBDAutoCrackElement>>) {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(p1)
+                }
+
+                override fun onStopFailed() {
+                    logger.loggerMessage("onStopFailed")
+
+                }
+
+                override fun onStatusChange(p0: Int, p1: Int) {
+                    logger.loggerMessage("p0 = $p0 , p1 = $p1")
+
+                }
+
+                override fun onStartSuccess() {
+                    logger.loggerMessage("onStartSuccess")
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(OBDOperationResult.StartSuccess)
+                }
+
+                override fun onStopSuccess() {
+                    logger.loggerMessage("onStopSuccess")
+
+                }
+
+                override fun onStartFailed() {
+                    logger.loggerMessage("onStartFailed")
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(OBDOperationResult.StartFailure)
+                }
+
+                /**
+                 * 左边obd破解结果
+                 */
+                override fun onReviewData1StatusChange(p0: Boolean) {
+                    logger.loggerMessage("onReviewData1StatusChange $p0")
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(if (p0) OBDOperationResult.LeftCrackSuccess else OBDOperationResult.LeftCrackFailure)
+                }
+
+                /**
+                 * 右边obd破解结果
+                 */
+                override fun onReviewData2StatusChange(p0: Boolean) {
+                    logger.loggerMessage("onReviewData2StatusChange $p0")
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(if (p0) OBDOperationResult.RightCrackSuccess else OBDOperationResult.RightCrackFailure)
+                }
+
+            })
+
+        }
+
+
+    }
+
+    /**
+     * 停止获取obd数据
+     */
+    fun stopGetAllCANDataList(): Observable<Boolean> {
+
+
+        return Observable.create { emitter ->
+            deviceHelper.stopGetAllCANDataList(object : OBDDebugCallback {
+                override fun onGetCANData(p0: ByteArray, p1: ByteArray) {
+
+
+                }
+
+                override fun onGetResult(result: Boolean) {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(result)
+                }
+
+            })
+        }
+
+    }
+
+    /**
+     * 验证破解出来的obd数据对不对
+     */
+    fun startReview(left: OBDAutoCrackElement, right: OBDAutoCrackElement) {
+        deviceHelper.startReview(left, right)
+    }
+
+    /**
+     * 设置obd数据
+     */
+    fun setOBDCrackData(left: OBDAutoCrackElement, right: OBDAutoCrackElement): Observable<Boolean> {
+
+        return Observable.create { emitter ->
+            deviceHelper.setOBDCrackData(left, right, object : SetOBDCrackDataCallback {
+                override fun onSuccess() {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(true)
+                }
+
+                override fun onFail(p0: Int) {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(false)
+
+                }
+            })
+        }
+    }
+
+    /**
+     * 开始过滤发生变化
+     */
+    fun startToFilterOutChangedData(time: Long = 9000) {
+        deviceHelper.startToFilterOutChangedData(time)
+    }
+
+    /**
+     * 开始过滤掉没发生变化
+     */
+    fun startToFilterOutFixedData(time: Long = 13000) {
+        deviceHelper.startToFilterOutFixedData(time)
     }
 
     private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
