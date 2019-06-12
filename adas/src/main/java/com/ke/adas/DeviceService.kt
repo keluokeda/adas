@@ -1527,33 +1527,7 @@ class DeviceService(
     }
 
 
-    /**
-     * 清除OBD故障码
-     */
-    fun clearErrorCode(): Observable<Boolean> {
-        return Observable.create { emitter ->
-            deviceHelper.clearOBDErrorcode(object : SetOBDCrackDataCallback {
-                override fun onSuccess() {
 
-                    if (emitter.isDisposed) {
-                        return
-                    }
-                    emitter.onNext(true)
-
-                }
-
-                override fun onFail(p0: Int) {
-                    if (emitter.isDisposed) {
-                        return
-                    }
-                    emitter.onNext(false)
-                }
-
-            })
-        }
-
-
-    }
 
     private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
 
