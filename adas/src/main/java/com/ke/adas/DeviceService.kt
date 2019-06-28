@@ -417,7 +417,7 @@ class DeviceService(
             deviceHelper.getCommuBoardVersion(object : GetNetVersionCallback {
                 override fun onSuccess(p0: String, p1: String) {
                     logger.loggerMessage("获取通讯板版本号成功 $p0 $p1")
-                    it.onNext(p1)
+                    it.onNext(p0)
                     it.onComplete()
                 }
 
