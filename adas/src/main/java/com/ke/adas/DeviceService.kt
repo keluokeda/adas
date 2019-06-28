@@ -1233,11 +1233,11 @@ class DeviceService(
     /**
      * 获取更新信息
      */
-    @Deprecated(message = "放弃使用")
     fun getUpdateMessage(
         updateType: UpdateType,
         obdVersion: String,
-        buzzerVersion: String
+        buzzerVersion: String,
+        currentVersion: String
     ): Observable<CheckUpdateResult> {
 
 
@@ -1245,7 +1245,15 @@ class DeviceService(
             updateType.type,
             obdVersion = obdVersion,
             buzzerVersion = buzzerVersion
-        )
+        ).map {
+
+            if (deviceHelper.checkoutNeedUpdateCWS(updateType.type, currentVersion, it.message?.versionCode ?: 0)) {
+                it
+            } else {
+                CheckUpdateResult(result = 110, message = null)
+            }
+
+        }
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable ->
 
@@ -1256,37 +1264,37 @@ class DeviceService(
     }
 
 
-    /**
-     *获取升级信息
-     */
-    fun getUpdateMessage(type: Int): Observable<CheckUpdateResult> {
-
-        return Observable.just(1)
-            .observeOn(Schedulers.io())
-            .map {
-                val updateFile = deviceHelper.getHasUpdate(type)
-
-                if (updateFile == null)
-                    CheckUpdateResult(result = 110, message = null)
-                else
-                    CheckUpdateResult(
-                        result = 0, message = UpdateMessage(
-                            path = updateFile.path,
-                            fileName = updateFile.filename,
-                            length = updateFile.length,
-                            versionCode = updateFile.versioncode,
-                            versionName = updateFile.versionname,
-                            md5 = updateFile.md5
-                        )
-                    )
-
-            }
-            .onErrorReturn { throwable ->
-
-                logger.loggerMessage(throwable.message ?: "出错了")
-                return@onErrorReturn CheckUpdateResult(result = 110, message = null)
-            }
-    }
+//    /**
+//     *获取升级信息
+//     */
+//    fun getUpdateMessage(type: Int): Observable<CheckUpdateResult> {
+//
+//        return Observable.just(1)
+//            .observeOn(Schedulers.io())
+//            .map {
+//                val updateFile = deviceHelper.getHasUpdate(type)
+//
+//                if (updateFile == null)
+//                    CheckUpdateResult(result = 110, message = null)
+//                else
+//                    CheckUpdateResult(
+//                        result = 0, message = UpdateMessage(
+//                            path = updateFile.path,
+//                            fileName = updateFile.filename,
+//                            length = updateFile.length,
+//                            versionCode = updateFile.versioncode,
+//                            versionName = updateFile.versionname,
+//                            md5 = updateFile.md5
+//                        )
+//                    )
+//
+//            }
+//            .onErrorReturn { throwable ->
+//
+//                logger.loggerMessage(throwable.message ?: "出错了")
+//                return@onErrorReturn CheckUpdateResult(result = 110, message = null)
+//            }
+//    }
 
 
     /**
@@ -1366,119 +1374,119 @@ class DeviceService(
     }
 
 
-    /**
-     * 开始获取obd数据表
-     * @param time 需要的时间，单位毫秒
-     */
-    fun startGetAllCANDataList(time: Long = 13000): Observable<Any> {
+//    /**
+//     * 开始获取obd数据表
+//     * @param time 需要的时间，单位毫秒
+//     */
+//    fun startGetAllCANDataList(time: Long = 13000): Observable<Any> {
+//
+//
+//        return Observable.create { emitter ->
+//
+//            deviceHelper.startGetAllCANDataList(time, object : OBDAutoCrackCallback {
+//                override fun onCrackFailed() {
+//                    logger.loggerMessage("onCrackFailed")
+//
+//
+//                }
+//
+//                override fun onStageResult(p0: Int, p1: MutableMap<String, ArrayList<OBDAutoCrackElement>>) {
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//
+//                    emitter.onNext(p1)
+//                }
+//
+//                override fun onStopFailed() {
+//                    logger.loggerMessage("onStopFailed")
+//
+//                }
+//
+//                override fun onStatusChange(p0: Int, p1: Int) {
+//                    logger.loggerMessage("p0 = $p0 , p1 = $p1")
+//
+//                }
+//
+//                override fun onStartSuccess() {
+//                    logger.loggerMessage("onStartSuccess")
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//                    emitter.onNext(OBDOperationResult.StartSuccess)
+//                }
+//
+//                override fun onStopSuccess() {
+//                    logger.loggerMessage("onStopSuccess")
+//
+//                }
+//
+//                override fun onStartFailed() {
+//                    logger.loggerMessage("onStartFailed")
+//
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//                    emitter.onNext(OBDOperationResult.StartFailure)
+//                }
+//
+//                /**
+//                 * 左边obd破解结果
+//                 */
+//                override fun onReviewData1StatusChange(p0: Boolean) {
+//                    logger.loggerMessage("onReviewData1StatusChange $p0")
+//
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//
+//                    emitter.onNext(if (p0) OBDOperationResult.LeftCrackSuccess else OBDOperationResult.LeftCrackFailure)
+//                }
+//
+//                /**
+//                 * 右边obd破解结果
+//                 */
+//                override fun onReviewData2StatusChange(p0: Boolean) {
+//                    logger.loggerMessage("onReviewData2StatusChange $p0")
+//
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//
+//                    emitter.onNext(if (p0) OBDOperationResult.RightCrackSuccess else OBDOperationResult.RightCrackFailure)
+//                }
+//
+//            })
+//
+//        }
+//
+//
+//    }
 
-
-        return Observable.create { emitter ->
-
-            deviceHelper.startGetAllCANDataList(time, object : OBDAutoCrackCallback {
-                override fun onCrackFailed() {
-                    logger.loggerMessage("onCrackFailed")
-
-
-                }
-
-                override fun onStageResult(p0: Int, p1: MutableMap<String, ArrayList<OBDAutoCrackElement>>) {
-                    if (emitter.isDisposed) {
-                        return
-                    }
-
-                    emitter.onNext(p1)
-                }
-
-                override fun onStopFailed() {
-                    logger.loggerMessage("onStopFailed")
-
-                }
-
-                override fun onStatusChange(p0: Int, p1: Int) {
-                    logger.loggerMessage("p0 = $p0 , p1 = $p1")
-
-                }
-
-                override fun onStartSuccess() {
-                    logger.loggerMessage("onStartSuccess")
-                    if (emitter.isDisposed) {
-                        return
-                    }
-                    emitter.onNext(OBDOperationResult.StartSuccess)
-                }
-
-                override fun onStopSuccess() {
-                    logger.loggerMessage("onStopSuccess")
-
-                }
-
-                override fun onStartFailed() {
-                    logger.loggerMessage("onStartFailed")
-
-                    if (emitter.isDisposed) {
-                        return
-                    }
-                    emitter.onNext(OBDOperationResult.StartFailure)
-                }
-
-                /**
-                 * 左边obd破解结果
-                 */
-                override fun onReviewData1StatusChange(p0: Boolean) {
-                    logger.loggerMessage("onReviewData1StatusChange $p0")
-
-                    if (emitter.isDisposed) {
-                        return
-                    }
-
-                    emitter.onNext(if (p0) OBDOperationResult.LeftCrackSuccess else OBDOperationResult.LeftCrackFailure)
-                }
-
-                /**
-                 * 右边obd破解结果
-                 */
-                override fun onReviewData2StatusChange(p0: Boolean) {
-                    logger.loggerMessage("onReviewData2StatusChange $p0")
-
-                    if (emitter.isDisposed) {
-                        return
-                    }
-
-                    emitter.onNext(if (p0) OBDOperationResult.RightCrackSuccess else OBDOperationResult.RightCrackFailure)
-                }
-
-            })
-
-        }
-
-
-    }
-
-    /**
-     * 停止获取obd数据
-     */
-    fun stopGetAllCANDataList(): Observable<Boolean> {
-
-
-        return Observable.create { emitter ->
-            deviceHelper.stopGetAllCANDataList(object : OBDDebugCallback {
-                override fun onGetCANData(p0: ByteArray, p1: ByteArray) {
-
-
-                }
-
-                override fun onGetResult(result: Boolean) {
-                    if (emitter.isDisposed) {
-                        return
-                    }
-                    emitter.onNext(result)
-                }
-
-            })
-        }
-
-    }
+//    /**
+//     * 停止获取obd数据
+//     */
+//    fun stopGetAllCANDataList(): Observable<Boolean> {
+//
+//
+//        return Observable.create { emitter ->
+//            deviceHelper.stopGetAllCANDataList(object : OBDDebugCallback {
+//                override fun onGetCANData(p0: ByteArray, p1: ByteArray) {
+//
+//
+//                }
+//
+//                override fun onGetResult(result: Boolean) {
+//                    if (emitter.isDisposed) {
+//                        return
+//                    }
+//                    emitter.onNext(result)
+//                }
+//
+//            })
+//        }
+//
+//    }
 
     /**
      * 验证破解出来的obd数据对不对
@@ -1525,8 +1533,6 @@ class DeviceService(
     fun startToFilterOutFixedData(time: Long = 13000) {
         deviceHelper.startToFilterOutFixedData(time)
     }
-
-
 
 
     private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
