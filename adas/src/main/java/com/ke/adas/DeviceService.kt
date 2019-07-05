@@ -391,7 +391,7 @@ class DeviceService(
     /**
      * 开启实况模式 2
      */
-    fun startRealView(): Observable<Boolean> {
+        fun startRealView(): Observable<Boolean> {
 
         return Observable.create<Boolean> {
             logger.loggerMessage("开始实况模式")
@@ -417,7 +417,7 @@ class DeviceService(
             deviceHelper.getCommuBoardVersion(object : GetNetVersionCallback {
                 override fun onSuccess(p0: String, p1: String) {
                     logger.loggerMessage("获取通讯板版本号成功 $p0 $p1")
-                    it.onNext(p0)
+                    it.onNext(p1)
                     it.onComplete()
                 }
 
