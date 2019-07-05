@@ -391,7 +391,7 @@ class DeviceService(
     /**
      * 开启实况模式 2
      */
-        fun startRealView(): Observable<Boolean> {
+    fun startRealView(): Observable<Boolean> {
 
         return Observable.create<Boolean> {
             logger.loggerMessage("开始实况模式")
@@ -1248,8 +1248,11 @@ class DeviceService(
         ).map {
 
             if (deviceHelper.checkoutNeedUpdateCWS(updateType.type, currentVersion, it.message?.versionCode ?: 0)) {
+                logger.loggerMessage("需要升级 ${updateType.name} $it")
                 it
             } else {
+                logger.loggerMessage("不需要升级 ${updateType.name} $it")
+
                 CheckUpdateResult(result = 110, message = null)
             }
 
