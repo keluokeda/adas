@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit-converters:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
-    implementation files('libs/vispect_sdk_v_1.0.19.jar')
+    implementation files('libs/vispect_sdk_v_1.0.20.jar')
 }
 repositories {
     mavenCentral()
