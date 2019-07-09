@@ -1334,8 +1334,72 @@ class DeviceService(
      * 更新设备obd
      */
     fun updateDeviceObd(path: String): Observable<Int> {
-        return Observable.create {
-            deviceHelper.uploadOBDUpdataFile(path, createProgressCallback(it))
+        return Observable.create { progressEmitter ->
+            //            deviceHelper.uploadOBDUpdataFile(path, createProgressCallback(it))
+
+
+            deviceHelper.uploadOBDUpdataFile(path, object : ProgressCallback {
+                override fun onDone(p0: String, p1: String) {
+
+                    logger.loggerMessage("上传obd升级文件成功 $p0 $p1 ")
+
+
+                    deviceHelper.startGetOBDUpdataProgress(object : ProgressCallback {
+                        override fun onDone(v1: String?, v2: String?) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            progressEmitter.onComplete()
+                        }
+
+                        override fun onProgressChange(progress: Long) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            progressEmitter.onNext((progress / 2).toInt() + 50)
+                        }
+
+                        override fun onErro(p0: Int) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            logger.loggerMessage("获取obd文件更新进度出错 $p0")
+
+                            progressEmitter.onError(DeviceException(p0))
+                        }
+
+                    }, 1000)
+                }
+
+                override fun onProgressChange(progress: Long) {
+
+
+                    if (progressEmitter.isDisposed) {
+                        return
+                    }
+
+                    progressEmitter.onNext((progress / 2).toInt())
+
+                }
+
+                override fun onErro(p0: Int) {
+
+                    if (progressEmitter.isDisposed) {
+                        return
+                    }
+
+                    logger.loggerMessage("上传obd升级文件出错 $p0")
+
+                    progressEmitter.onError(DeviceException(p0))
+                }
+
+            })
         }
     }
 
