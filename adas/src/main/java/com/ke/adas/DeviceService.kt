@@ -1334,7 +1334,7 @@ class DeviceService(
      * 更新设备obd
      */
     fun updateDeviceObd(path: String): Observable<Int> {
-        return Observable.create { progressEmitter ->
+        return Observable.create<Int> { progressEmitter ->
             //            deviceHelper.uploadOBDUpdataFile(path, createProgressCallback(it))
 
 
@@ -1360,6 +1360,8 @@ class DeviceService(
                                 return
                             }
 
+                            logger.loggerMessage("获取更新obd进度 $progress")
+
                             progressEmitter.onNext((progress / 2).toInt() + 50)
                         }
 
@@ -1369,7 +1371,7 @@ class DeviceService(
                                 return
                             }
 
-                            logger.loggerMessage("获取obd文件更新进度出错 $p0")
+                            logger.loggerMessage("获取更新obd出错 $p0")
 
                             progressEmitter.onError(DeviceException(p0))
                         }
@@ -1383,6 +1385,9 @@ class DeviceService(
                     if (progressEmitter.isDisposed) {
                         return
                     }
+
+                    logger.loggerMessage("上传obd文件进度更新 $progress")
+
 
                     progressEmitter.onNext((progress / 2).toInt())
 
@@ -1401,6 +1406,17 @@ class DeviceService(
 
             })
         }
+            .doOnDispose {
+                deviceHelper.stopGetOBDUpdataProgress()
+            }
+            .doOnError {
+                deviceHelper.stopGetOBDUpdataProgress()
+            }
+            .doOnComplete {
+                deviceHelper.stopGetOBDUpdataProgress()
+            }
+
+
     }
 
 
