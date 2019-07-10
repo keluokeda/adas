@@ -408,39 +408,6 @@ class DeviceService(
 
     }
 
-    /**
-     * 获取通讯板版本号
-     */
-    fun getConnectionBoardVersion(): Observable<String> {
-        return Observable.create {
-            logger.loggerMessage("开始获取通讯板版本号")
-            deviceHelper.getCommuBoardVersion(object : GetNetVersionCallback {
-                override fun onSuccess(p0: String, p1: String) {
-                    logger.loggerMessage("获取通讯板版本号成功 $p0 $p1")
-                    it.onNext(p1)
-                    it.onComplete()
-                }
-
-                override fun onFail(p0: Int) {
-                    logger.loggerMessage("获取通讯板版本号失败")
-                    it.onError(DeviceException(p0))
-                }
-
-            })
-        }
-    }
-
-
-    /**
-     * 上传通讯板升级文件
-     */
-    fun uploadConnectionBoardUpdateFile(path: String): Observable<Int> {
-
-        return Observable.create {
-            deviceHelper.uploadNETUpdataFile(path, createProgressCallback(it))
-        }
-    }
-
 
     /**
      * 加载视频列表
@@ -1259,6 +1226,7 @@ class DeviceService(
         }
             .subscribeOn(Schedulers.io())
             .onErrorReturn { throwable ->
+                throwable.printStackTrace()
 
                 logger.loggerMessage(throwable.message ?: "出错了")
                 return@onErrorReturn CheckUpdateResult(result = 110, message = null)
@@ -1327,6 +1295,122 @@ class DeviceService(
      */
     fun closeDeviceUpdateMode() {
         deviceHelper.closeDeviceUpdateMode()
+    }
+
+
+    /**
+     * 获取通讯板版本号
+     */
+    fun getConnectionBoardVersion(): Observable<String> {
+        return Observable.create {
+            logger.loggerMessage("开始获取通讯板版本号")
+            deviceHelper.getCommuBoardVersion(object : GetNetVersionCallback {
+                override fun onSuccess(p0: String, p1: String) {
+                    logger.loggerMessage("获取通讯板版本号成功 $p0 $p1")
+                    it.onNext(p1)
+                    it.onComplete()
+                }
+
+                override fun onFail(p0: Int) {
+                    logger.loggerMessage("获取通讯板版本号失败")
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+
+    /**
+     * 上传通讯板升级文件
+     */
+    fun uploadConnectionBoardUpdateFile(path: String): Observable<Int> {
+
+//        return Observable.create {
+//            deviceHelper.uploadNETUpdataFile(path, createProgressCallback(it))
+//        }
+
+        return Observable.create<Int> { progressEmitter ->
+            //            deviceHelper.uploadOBDUpdataFile(path, createProgressCallback(it))
+
+
+            deviceHelper.uploadNETUpdataFile(path, object : ProgressCallback {
+                override fun onDone(p0: String, p1: String) {
+
+                    logger.loggerMessage("上传通讯板升级文件成功 $p0 $p1 ")
+
+
+                    deviceHelper.startGetNetUpdateProgress(object : ProgressCallback {
+                        override fun onDone(v1: String?, v2: String?) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            progressEmitter.onComplete()
+                        }
+
+                        override fun onProgressChange(progress: Long) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            logger.loggerMessage("获取更新通讯板进度 $progress")
+
+                            progressEmitter.onNext((progress / 2).toInt() + 50)
+                        }
+
+                        override fun onErro(p0: Int) {
+
+                            if (progressEmitter.isDisposed) {
+                                return
+                            }
+
+                            logger.loggerMessage("获取更新通讯板出错 $p0")
+
+                            progressEmitter.onError(DeviceException(p0))
+                        }
+
+                    }, 1000)
+                }
+
+                override fun onProgressChange(progress: Long) {
+
+
+                    if (progressEmitter.isDisposed) {
+                        return
+                    }
+
+                    logger.loggerMessage("上传通讯板文件进度更新 $progress")
+
+
+                    progressEmitter.onNext((progress / 2).toInt())
+
+                }
+
+                override fun onErro(p0: Int) {
+
+                    if (progressEmitter.isDisposed) {
+                        return
+                    }
+
+                    logger.loggerMessage("上传通讯板升级文件出错 $p0")
+
+                    progressEmitter.onError(DeviceException(p0))
+                }
+
+            })
+        }
+            .doOnDispose {
+                deviceHelper.stopGetNetUpdataProgress()
+            }
+            .doOnError {
+                deviceHelper.stopGetNetUpdataProgress()
+            }
+            .doOnComplete {
+                deviceHelper.stopGetNetUpdataProgress()
+            }
     }
 
 
