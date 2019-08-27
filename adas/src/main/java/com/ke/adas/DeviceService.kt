@@ -189,7 +189,8 @@ class DeviceService(
      * 设备wifi是否连上
      */
     fun isWifiConnected(): Observable<Boolean> {
-        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
         val ssid = wifiInfo?.ssid?.replace("\"", "")
@@ -710,7 +711,8 @@ class DeviceService(
 
         val callback = object : ProgressCallback {
             override fun onDone(path: String, md5: String) {
-                val downloadVideoInfo = DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
+                val downloadVideoInfo =
+                    DownloadVideoInfo(videoName = videoName, filePath = path, fileMd5 = md5)
 
                 logger.loggerMessage("下载视频完成 $downloadVideoInfo")
 
@@ -763,7 +765,8 @@ class DeviceService(
                 if (deviceVideo != null) {
 
                     //更新数据
-                    pair.first[pair.first.indexOf(deviceVideo)] = deviceVideo.onProgressChange(progress.toInt())
+                    pair.first[pair.first.indexOf(deviceVideo)] =
+                        deviceVideo.onProgressChange(progress.toInt())
                     //发布更新
                     pair.second.onNext(pair.first)
                 }
@@ -1027,7 +1030,12 @@ class DeviceService(
      */
     fun setCarParameter(carPara: CarParameter): Observable<Boolean> {
         return Observable.create {
-            deviceHelper.setCarPara(carPara.width, carPara.height, carPara.length, getSetDeviceInfoCallback(it))
+            deviceHelper.setCarPara(
+                carPara.width,
+                carPara.height,
+                carPara.length,
+                getSetDeviceInfoCallback(it)
+            )
         }
     }
 
@@ -1078,7 +1086,12 @@ class DeviceService(
             val width = carParameter.width
 
             return@flatMap getCameraParameter().map {
-                return@map DeviceParameter(width = width, center = it.center, height = it.height, front = it.front)
+                return@map DeviceParameter(
+                    width = width,
+                    center = it.center,
+                    height = it.height,
+                    front = it.front
+                )
             }
         }
     }
@@ -1183,7 +1196,14 @@ class DeviceService(
     fun getVersion(): Observable<Version> {
         return Observable.create {
             deviceHelper.getDeviceVersion(object : GetBleInfoVersionCallback {
-                override fun onSuccess(p0: String, p1: String, p2: String, p3: String, p4: String, p5: String) {
+                override fun onSuccess(
+                    p0: String,
+                    p1: String,
+                    p2: String,
+                    p3: String,
+                    p4: String,
+                    p5: String
+                ) {
                     it.onNext(Version(p0, p1, p2, p3, p4, p5))
                     it.onComplete()
                 }
@@ -1214,7 +1234,12 @@ class DeviceService(
             buzzerVersion = buzzerVersion
         ).map {
 
-            if (deviceHelper.checkoutNeedUpdateCWS(updateType.type, currentVersion, it.message?.versionCode ?: 0)) {
+            if (deviceHelper.checkoutNeedUpdateCWS(
+                    updateType.type,
+                    currentVersion,
+                    it.message?.versionCode ?: 0
+                )
+            ) {
                 logger.loggerMessage("需要升级 ${updateType.name} $it")
                 it
             } else {
@@ -1541,6 +1566,28 @@ class DeviceService(
     }
 
 
+    fun setObdData(data: String): Observable<Boolean> {
+        return Observable.create<Boolean> {
+            deviceHelper.setOBDCrackData(data, object : SetOBDCrackDataCallback {
+                override fun onSuccess() {
+                    if (it.isDisposed) {
+                        return
+                    }
+                    it.onNext(true)
+                }
+
+                override fun onFail(p0: Int) {
+                    if (it.isDisposed) {
+                        return
+                    }
+                    it.onNext(false)
+                }
+
+            })
+        }
+    }
+
+
 //    /**
 //     * 开始获取obd数据表
 //     * @param time 需要的时间，单位毫秒
@@ -1659,13 +1706,17 @@ class DeviceService(
      * 验证破解出来的obd数据对不对
      */
     fun startReview(left: OBDAutoCrackElement, right: OBDAutoCrackElement) {
+
         deviceHelper.startReview(left, right)
     }
 
     /**
      * 设置obd数据
      */
-    fun setOBDCrackData(left: OBDAutoCrackElement, right: OBDAutoCrackElement): Observable<Boolean> {
+    fun setOBDCrackData(
+        left: OBDAutoCrackElement,
+        right: OBDAutoCrackElement
+    ): Observable<Boolean> {
 
         return Observable.create { emitter ->
             deviceHelper.setOBDCrackData(left, right, object : SetOBDCrackDataCallback {
