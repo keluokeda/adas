@@ -12,3 +12,5 @@ data class FilterOutChangedDataFinish(val size: Int) : AllCanDataListResult
 data class FilterOutFixedDataFinish(val size: Int) : AllCanDataListResult
 
 data class CurBeFilter(val obdAutoCrackElement: OBDAutoCrackElement) : AllCanDataListResult
+
+data class RestartToCrackResult(val result: Boolean) : AllCanDataListResult

@@ -1662,11 +1662,19 @@ class DeviceService(
                 override fun onRestartToCrackFailed() {
                     logger.loggerMessage("startGetAllCANDataList onRestartToCrackFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(RestartToCrackResult(false))
                 }
 
                 override fun onRestartToCrackSuccess() {
                     logger.loggerMessage("startGetAllCANDataList onRestartToCrackSuccess")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(RestartToCrackResult(true))
                 }
 
                 override fun onStartReviewFailed() {
