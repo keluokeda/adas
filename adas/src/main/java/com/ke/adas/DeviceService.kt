@@ -1569,7 +1569,7 @@ class DeviceService(
      * 开始获取obd数据表
      * @param time 需要的时间，单位毫秒
      */
-    fun startGetAllCANDataList(time: Long = 13000): Observable<Any> {
+    fun startGetAllCANDataList(time: Long = 13000): Observable<AllCanDataListResult> {
 
 
         return Observable.create { emitter ->
@@ -1577,13 +1577,24 @@ class DeviceService(
             deviceHelper.startGetAllCANDataList(time.toInt(), object : OBDAutoCrackCallback {
                 override fun onGetAllCANDataListFinish(p0: Int) {
                     logger.loggerMessage("startGetAllCANDataList onGetAllCANDataListFinish $p0")
-
                     //如果 p0 不为0 表示成功
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onNext(GetAllCANDataListFinish(p0))
                 }
 
                 override fun onGetCurBeFilterListSuccess(p0: ArrayList<OBDAutoCrackElement>) {
                     logger.loggerMessage("startGetAllCANDataList onGetCurBeFilterListSuccess $p0")
 
+
+                    if (p0.size == 1) {
+                        if (emitter.isDisposed) {
+                            return
+                        }
+
+                        emitter.onNext(CurBeFilter(p0.first()))
+                    }
                 }
 
                 override fun onStartFilterOutChangedDataFailed() {
@@ -1609,12 +1620,23 @@ class DeviceService(
                 override fun onToFilterOutFixedDataFinish(p0: Int) {
                     logger.loggerMessage("startGetAllCANDataList onToFilterOutFixedDataFinish $p0")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(FilterOutFixedDataFinish(p0))
                 }
 
                 override fun onFilterOutChangedDataFinish(p0: Int) {
                     logger.loggerMessage("startGetAllCANDataList onFilterOutChangedDataFinish $p0")
 
                     //完成后是否只剩下一条数据
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(FilterOutChangedDataFinish(p0))
                 }
 
                 override fun onStartReviewSuccess() {
@@ -1757,18 +1779,15 @@ class DeviceService(
     }
 
 
-    fun openCanListener(): Observable<Pair<Pair<ByteArray, ByteArray>?, Boolean?>> {
+    /**
+     * 开始破解
+     */
+    fun openCanListener(): Observable<Boolean> {
 
         return Observable.create {
             deviceHelper.openCANListener(object : OBDDebugCallback {
                 override fun onGetCANData(p0: ByteArray, p1: ByteArray) {
-                    logger.loggerMessage("openCanListener onGetCANData $p0 $p1")
 
-                    if (it.isDisposed) {
-                        return
-                    }
-
-                    it.onNext(p0 to p1 to null)
 
                 }
 
@@ -1779,7 +1798,8 @@ class DeviceService(
                         return
                     }
 
-                    it.onNext(null to p0)
+                    it.onNext(p0)
+                    it.onComplete()
                 }
 
             })
@@ -1789,6 +1809,8 @@ class DeviceService(
 
 
     fun stopAutoCrack(): Observable<Boolean> {
+
+//        deviceHelper.getReviewStatus()
 
         return Observable.create {
             deviceHelper.stopAutoCrack(object : OBDDebugCallback {
