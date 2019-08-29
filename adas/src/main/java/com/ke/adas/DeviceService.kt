@@ -3,10 +3,7 @@ package com.ke.adas
 import android.content.Context
 import android.graphics.Point
 import android.net.wifi.WifiManager
-import bean.BLEDevice
-import bean.DVRInfo
-import bean.DrawShape
-import bean.OBDAutoCrackElement
+import bean.*
 import com.example.vispect_blesdk.DeviceHelper
 import com.ke.adas.entity.*
 import com.ke.adas.exception.DeviceException
@@ -1766,6 +1763,8 @@ class DeviceService(
      * 手动设置obd
      */
     fun setObdData(data: String): Observable<Boolean> {
+
+
         return Observable.create<Boolean> {
             deviceHelper.setOBDCrackData(data, object : SetOBDCrackDataCallback {
                 override fun onSuccess() {
@@ -1856,6 +1855,7 @@ class DeviceService(
         deviceHelper.getReviewStatus()
     }
 
+
     /**
      * 设置obd数据
      */
@@ -1898,6 +1898,40 @@ class DeviceService(
         deviceHelper.startToFilterOutFixedData(time)
     }
 
+
+    /**
+     * 开始验证
+     */
+    fun startVerification(interval: Long = 1000): Observable<TurnSignal> {
+
+        return Observable.create<TurnSignal> { emitter ->
+
+            logger.loggerMessage(
+                "开始验证转向灯信号"
+            )
+            deviceHelper.startVerification(interval) {
+
+
+                logger.loggerMessage("获取到obd信号 $it")
+                if (!emitter.isDisposed) {
+                    if (it == Vispect_SDK_ARG.LIGHT_LEFT) {
+                        emitter.onNext(TurnSignal.Left)
+                    } else if (it == Vispect_SDK_ARG.LIGHT_RIGHT) {
+                        emitter.onNext(TurnSignal.Right)
+                    }
+                }
+
+
+            }
+
+
+        }.doOnDispose {
+            logger.loggerMessage("停止验证obd")
+            deviceHelper.stopVerification()
+        }
+
+
+    }
 
     private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
 
