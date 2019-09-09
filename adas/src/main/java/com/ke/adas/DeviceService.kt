@@ -112,6 +112,9 @@ class DeviceService(
     fun init(context: Context, appKey: String): Observable<Boolean> {
         this.context = context.applicationContext
 
+
+
+
         downloadedVideoRepository = DownloadedVideoRepository(this.context)
 
 
@@ -611,15 +614,15 @@ class DeviceService(
 //        it: ObservableEmitter<List<DeviceVideo>>
 //    ): DrivingVideoOperationListener {
 //        return object : DrivingVideoOperationListener {
-//            override fun onLockOrUnlockResult(p0: Boolean) {
+//            override fun onLockOrUnlockResult(rolling: Boolean) {
 //
 //            }
 //
-//            override fun onGetVideoList(p0: ArrayList<*>) {
-//                logger.loggerMessage("onGetVideoList $pageNo $p0")
+//            override fun onGetVideoList(rolling: ArrayList<*>) {
+//                logger.loggerMessage("onGetVideoList $pageNo $rolling")
 //
 //
-//                val list = p0.map { any ->
+//                val list = rolling.map { any ->
 //                    any as DVRInfo
 //                }
 //                    .map { info ->
@@ -972,7 +975,7 @@ class DeviceService(
             deviceHelper.getADASAlarmConfiguration(object : onGetADASAlarmConfigurationCallback {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
                     logger.loggerMessage("获取设备报警配置成功")
-                    it.onNext(AlarmConfiguration(p0, p1, p2, p3))
+                    it.onNext(AlarmConfiguration(p0, p1.toFrontCarActive(), p2, p3))
                 }
 
                 override fun onFail(p0: Int) {
@@ -992,8 +995,8 @@ class DeviceService(
         return Observable.create<Boolean> {
             logger.loggerMessage("开始设置设备报警配置")
             deviceHelper.ADASAlarmConfiguration(
-                alarmConfiguration.p0,
-                alarmConfiguration.p1,
+                alarmConfiguration.rolling,
+                alarmConfiguration.frontCarActive.level,
                 alarmConfiguration.p2,
                 alarmConfiguration.p3,
                 getSetDeviceInfoCallback(it)
@@ -1574,7 +1577,7 @@ class DeviceService(
             deviceHelper.startGetAllCANDataList(time.toInt(), object : OBDAutoCrackCallback {
                 override fun onGetAllCANDataListFinish(p0: Int) {
                     logger.loggerMessage("startGetAllCANDataList onGetAllCANDataListFinish $p0")
-                    //如果 p0 不为0 表示成功
+                    //如果 rolling 不为0 表示成功
                     if (emitter.isDisposed) {
                         return
                     }
@@ -1741,7 +1744,7 @@ class DeviceService(
 //
 //        return Observable.create { emitter ->
 //            deviceHelper.stopGetAllCANDataList(object : OBDDebugCallback {
-//                override fun onGetCANData(p0: ByteArray, p1: ByteArray) {
+//                override fun onGetCANData(rolling: ByteArray, p1: ByteArray) {
 //
 //
 //                }

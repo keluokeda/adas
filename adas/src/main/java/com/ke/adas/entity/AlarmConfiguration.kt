@@ -7,12 +7,11 @@ data class AlarmConfiguration(
      * 溜车
      */
     @IntRange(from = 0, to = 5)
-    val p0: Int,
+    val rolling: Int,
     /**
      * 前车启动
      */
-    @IntRange(from = 0, to = 5)
-    val p1: Int,
+    val frontCarActive: FrontCarActive,
     @IntRange(from = 0, to = 1)
     val p2: Int,
     @IntRange(from = 0, to = 1)
