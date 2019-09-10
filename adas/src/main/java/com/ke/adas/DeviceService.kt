@@ -850,7 +850,9 @@ class DeviceService(
             logger.loggerMessage("开始设置报警灵敏度 $deviceSensitivityLevel")
             deviceHelper.setADASSensitivityLevel(
                 deviceSensitivityLevel.ldw,
-                deviceSensitivityLevel.fcw,
+//                deviceSensitivityLevel.fcw
+                2
+                ,
                 deviceSensitivityLevel.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
@@ -881,7 +883,7 @@ class DeviceService(
             deviceHelper.getADASSensitivityLevel(object : GetADASSensitivityCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
                     logger.loggerMessage("获取报警灵敏度成功")
-                    it.onNext(DeviceSensitivityLevel(p0, p1, p2))
+                    it.onNext(DeviceSensitivityLevel(p0, 2, p2))
                 }
 
                 override fun onFail(p0: Int) {
