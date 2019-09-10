@@ -856,6 +856,9 @@ class DeviceService(
                 deviceSensitivityLevel.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
+                        if (it.isDisposed) {
+                            return
+                        }
                         logger.loggerMessage("设置报警灵敏度 结果 成功 $deviceSensitivityLevel ${it.isDisposed}")
                         it.onNext(true)
                         it.onComplete()
@@ -883,8 +886,12 @@ class DeviceService(
             logger.loggerMessage("开始获取报警灵敏度")
             deviceHelper.getADASSensitivityLevel(object : GetADASSensitivityCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    if (it.isDisposed) {
+                        return
+                    }
                     logger.loggerMessage("获取报警灵敏度成功")
                     it.onNext(DeviceSensitivityLevel(p0, 2, p2))
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
@@ -911,6 +918,9 @@ class DeviceService(
         return Observable.create {
             deviceHelper.getHMWTime(object : onGetHMWTimeCallback {
                 override fun onSuccess(p0: Int) {
+                    if (it.isDisposed) {
+                        return
+                    }
                     it.onNext(p0)
                     it.onComplete()
                 }
@@ -931,6 +941,9 @@ class DeviceService(
             logger.loggerMessage("开始获取报警启动车速")
             deviceHelper.GetADASSpeedThreshold(object : GetADASInfoCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
+                    if (it.isDisposed) {
+                        return
+                    }
                     logger.loggerMessage("获取报警启动车速成功 ${it.isDisposed}")
                     it.onNext(SpeedThreshold(p0, p1, p2))
                     it.onComplete()
@@ -956,6 +969,10 @@ class DeviceService(
                 speedThreshold.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
+                        if (it.isDisposed) {
+                            return
+                        }
+
                         logger.loggerMessage("设置报警启动车速成功 ${it.isDisposed}")
 
                         it.onNext(true)
@@ -980,6 +997,10 @@ class DeviceService(
             logger.loggerMessage("开始获取设备报警配置")
             deviceHelper.getADASAlarmConfiguration(object : onGetADASAlarmConfigurationCallback {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
+
+                    if (it.isDisposed) {
+                        return
+                    }
                     logger.loggerMessage("获取设备报警配置成功 ${it.isDisposed}")
                     it.onNext(AlarmConfiguration(p0, p1.toFrontCarActive(), p2, p3))
                     it.onComplete()
