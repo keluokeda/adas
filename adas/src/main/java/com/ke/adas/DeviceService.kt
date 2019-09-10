@@ -856,8 +856,9 @@ class DeviceService(
                 deviceSensitivityLevel.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
-                        logger.loggerMessage("设置报警灵敏度 结果 成功 $deviceSensitivityLevel")
+                        logger.loggerMessage("设置报警灵敏度 结果 成功 $deviceSensitivityLevel ${it.isDisposed}")
                         it.onNext(true)
+                        it.onComplete()
                     }
 
                     override fun onFail(p0: Int) {
@@ -911,6 +912,7 @@ class DeviceService(
             deviceHelper.getHMWTime(object : onGetHMWTimeCallback {
                 override fun onSuccess(p0: Int) {
                     it.onNext(p0)
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
@@ -929,8 +931,9 @@ class DeviceService(
             logger.loggerMessage("开始获取报警启动车速")
             deviceHelper.GetADASSpeedThreshold(object : GetADASInfoCallback {
                 override fun OnSuccess(p0: Int, p1: Int, p2: Int) {
-                    logger.loggerMessage("获取报警启动车速成功")
+                    logger.loggerMessage("获取报警启动车速成功 ${it.isDisposed}")
                     it.onNext(SpeedThreshold(p0, p1, p2))
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
@@ -953,13 +956,14 @@ class DeviceService(
                 speedThreshold.pcw,
                 object : SetDeviceInfoCallback {
                     override fun onSuccess() {
-                        logger.loggerMessage("设置报警启动车速成功")
+                        logger.loggerMessage("设置报警启动车速成功 ${it.isDisposed}")
 
                         it.onNext(true)
+                        it.onComplete()
                     }
 
                     override fun onFail(p0: Int) {
-                        logger.loggerMessage("设置报警启动车速失败 $p0")
+                        logger.loggerMessage("设置报警启动车速失败 $p0 ${it.isDisposed}")
 
                         it.onError(DeviceException(p0))
                     }
@@ -976,8 +980,9 @@ class DeviceService(
             logger.loggerMessage("开始获取设备报警配置")
             deviceHelper.getADASAlarmConfiguration(object : onGetADASAlarmConfigurationCallback {
                 override fun onSuccess(p0: Int, p1: Int, p2: Int, p3: Int) {
-                    logger.loggerMessage("获取设备报警配置成功")
+                    logger.loggerMessage("获取设备报警配置成功 ${it.isDisposed}")
                     it.onNext(AlarmConfiguration(p0, p1.toFrontCarActive(), p2, p3))
+                    it.onComplete()
                 }
 
                 override fun onFail(p0: Int) {
