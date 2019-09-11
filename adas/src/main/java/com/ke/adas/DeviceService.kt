@@ -1002,7 +1002,7 @@ class DeviceService(
                         return
                     }
                     logger.loggerMessage("获取设备报警配置成功 ${it.isDisposed}")
-                    it.onNext(AlarmConfiguration(p0, p1.toFrontCarActive(), p2, p3))
+                    it.onNext(AlarmConfiguration(p0, p1, p2, p3))
                     it.onComplete()
                 }
 
@@ -1024,7 +1024,7 @@ class DeviceService(
             logger.loggerMessage("开始设置设备报警配置")
             deviceHelper.ADASAlarmConfiguration(
                 alarmConfiguration.rolling,
-                alarmConfiguration.frontCarActive.level,
+                alarmConfiguration.frontCarActive,
                 alarmConfiguration.p2,
                 alarmConfiguration.p3,
                 getSetDeviceInfoCallback(it)
