@@ -2,6 +2,7 @@ package com.ke.adas
 
 import android.content.Context
 import android.graphics.Point
+import android.graphics.PointF
 import android.net.wifi.WifiManager
 import bean.*
 import com.example.vispect_blesdk.DeviceHelper
@@ -1568,6 +1569,50 @@ class DeviceService(
     }
 
 
+    fun getCenterPoint() {
+        deviceHelper.getCenterPoint(object : CorrectingCallback {
+            override fun onGetOperationResult(p0: Boolean) {
+
+                logger.loggerMessage("onGetOperationResult $p0")
+
+            }
+
+            override fun onGetCenterPoint(p0: PointF) {
+
+                logger.loggerMessage("onGetCenterPoint $p0")
+            }
+
+            override fun onGetProgress(p0: Int) {
+
+                logger.loggerMessage("onGetProgress $p0")
+            }
+
+        })
+    }
+
+
+    fun startCorrecting() {
+        deviceHelper.startCorrecting(object : CorrectingCallback {
+            override fun onGetOperationResult(p0: Boolean) {
+
+                logger.loggerMessage("onGetOperationResult $p0")
+
+            }
+
+            override fun onGetCenterPoint(p0: PointF) {
+
+                logger.loggerMessage("onGetCenterPoint $p0")
+            }
+
+            override fun onGetProgress(p0: Int) {
+
+                logger.loggerMessage("onGetProgress $p0")
+            }
+
+        })
+    }
+
+
     /**
      * 清除OBD故障码
      */
@@ -2007,7 +2052,7 @@ class DeviceService(
         }
     }
 
-    private fun getOnWifiOpenListener(e: ObservableEmitter<kotlin.Pair<String, String>>): OnWifiOpenListener {
+    private fun getOnWifiOpenListener(e: ObservableEmitter<Pair<String, String>>): OnWifiOpenListener {
         return object : OnWifiOpenListener {
             override fun onSuccess(s: String, s1: String) {
                 logger.loggerMessage("get wifi account = $s password = $s1")
