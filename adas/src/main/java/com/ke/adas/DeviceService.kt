@@ -1613,6 +1613,27 @@ class DeviceService(
     }
 
 
+    fun getCorrectingProgress() {
+        deviceHelper.getCorrectingProgress(object : CorrectingCallback {
+            override fun onGetOperationResult(p0: Boolean) {
+
+                logger.loggerMessage("onGetOperationResult $p0")
+
+            }
+
+            override fun onGetCenterPoint(p0: PointF) {
+
+                logger.loggerMessage("onGetCenterPoint $p0")
+            }
+
+            override fun onGetProgress(p0: Int) {
+
+                logger.loggerMessage("onGetProgress $p0")
+            }
+
+        })
+    }
+
     /**
      * 清除OBD故障码
      */
