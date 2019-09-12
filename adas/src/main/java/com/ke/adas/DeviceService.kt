@@ -1130,6 +1130,7 @@ class DeviceService(
      */
     fun setDeviceParameter(deviceParameter: DeviceParameter): Observable<Boolean> {
 
+
         return getCarParameter()
             .flatMap {
                 return@flatMap setCarParameter(
@@ -1155,6 +1156,36 @@ class DeviceService(
                 }
 
             }
+    }
+
+
+    /**
+     * 获取车速
+     */
+    fun getSpeed(): Observable<String> {
+        return Observable.create {
+            deviceHelper.getCarInfoData(object : GetCarInfoListener {
+                override fun onGetCarInfoData(p0: Vispect_SDK_CarInfo) {
+
+                    if (it.isDisposed) {
+                        return
+                    }
+
+                    it.onNext(p0.vehicleSpeed)
+                    it.onComplete()
+
+                }
+
+                override fun onErro(p0: Int) {
+                    if (it.isDisposed) {
+                        return
+                    }
+
+                    it.onError(DeviceException(p0))
+                }
+
+            })
+        }
     }
 
 
