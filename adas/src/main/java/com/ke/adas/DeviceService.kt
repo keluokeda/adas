@@ -1569,69 +1569,114 @@ class DeviceService(
     }
 
 
-    fun getCenterPoint() {
-        deviceHelper.getCenterPoint(object : CorrectingCallback {
-            override fun onGetOperationResult(p0: Boolean) {
+    /**
+     * 开始校准
+     */
+    fun startCorrecting(): Observable<Boolean> {
 
-                logger.loggerMessage("onGetOperationResult $p0")
+        return Observable.create {
+            deviceHelper.startCorrecting(object : CorrectingCallback {
+                override fun onGetOperationResult(p0: Boolean) {
 
-            }
+                    logger.loggerMessage("onGetOperationResult $p0")
 
-            override fun onGetCenterPoint(p0: PointF) {
+                    if (it.isDisposed) {
+                        return
+                    }
 
-                logger.loggerMessage("onGetCenterPoint $p0")
-            }
+                    it.onNext(p0)
+                    it.onComplete()
 
-            override fun onGetProgress(p0: Int) {
+                }
 
-                logger.loggerMessage("onGetProgress $p0")
-            }
+                override fun onGetCenterPoint(p0: PointF) {
 
-        })
+                    logger.loggerMessage("onGetCenterPoint $p0")
+                }
+
+                override fun onGetProgress(p0: Int) {
+
+                    logger.loggerMessage("onGetProgress $p0")
+                }
+
+            })
+        }
+
+
     }
 
 
-    fun startCorrecting() {
-        deviceHelper.startCorrecting(object : CorrectingCallback {
-            override fun onGetOperationResult(p0: Boolean) {
+    /**
+     * 是否已经校准完成
+     */
+    fun isCenterPointCorrecting(): Observable<Boolean> {
+        return Observable.create { emitter ->
 
-                logger.loggerMessage("onGetOperationResult $p0")
+            deviceHelper.getCenterPoint(object : CorrectingCallback {
+                override fun onGetOperationResult(p0: Boolean) {
 
-            }
+                    logger.loggerMessage("onGetOperationResult $p0")
 
-            override fun onGetCenterPoint(p0: PointF) {
+                }
 
-                logger.loggerMessage("onGetCenterPoint $p0")
-            }
+                override fun onGetCenterPoint(point: PointF) {
 
-            override fun onGetProgress(p0: Int) {
+                    logger.loggerMessage("onGetCenterPoint $point")
 
-                logger.loggerMessage("onGetProgress $p0")
-            }
 
-        })
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onNext(point.x > 0 && point.y > 0)
+                    emitter.onComplete()
+                }
+
+                override fun onGetProgress(p0: Int) {
+
+                    logger.loggerMessage("onGetProgress $p0")
+                }
+
+            })
+        }
     }
 
 
-    fun getCorrectingProgress() {
-        deviceHelper.getCorrectingProgress(object : CorrectingCallback {
-            override fun onGetOperationResult(p0: Boolean) {
+    /**
+     * 获取校准进度
+     */
+    fun getCorrectingProgress(): Observable<Int> {
 
-                logger.loggerMessage("onGetOperationResult $p0")
+        return Observable.create {
+            deviceHelper.getCorrectingProgress(object : CorrectingCallback {
+                override fun onGetOperationResult(p0: Boolean) {
 
-            }
+                    logger.loggerMessage("onGetOperationResult $p0")
 
-            override fun onGetCenterPoint(p0: PointF) {
+                }
 
-                logger.loggerMessage("onGetCenterPoint $p0")
-            }
+                override fun onGetCenterPoint(point: PointF) {
 
-            override fun onGetProgress(p0: Int) {
+                    logger.loggerMessage("onGetCenterPoint $point")
+                }
 
-                logger.loggerMessage("onGetProgress $p0")
-            }
+                override fun onGetProgress(p0: Int) {
 
-        })
+                    logger.loggerMessage("onGetProgress $p0")
+
+                    if (it.isDisposed) {
+                        return
+                    }
+
+                    it.onNext(p0)
+
+
+                }
+
+            })
+        }
+
+
     }
 
     /**
