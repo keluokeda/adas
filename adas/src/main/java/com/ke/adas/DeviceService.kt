@@ -1770,10 +1770,21 @@ class DeviceService(
                 override fun onStartFilterOutChangedDataFailed() {
                     logger.loggerMessage("startGetAllCANDataList onStartFilterOutChangedDataFailed ")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onStartFilterOutChangedDataFailed"))
                 }
 
                 override fun onGetCurReviewStatusFailed() {
                     logger.loggerMessage("startGetAllCANDataList onGetCurReviewStatusFailed ")
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onGetCurReviewStatusFailed"))
 
                 }
 
@@ -1817,15 +1828,29 @@ class DeviceService(
                 override fun onStartToFilterOutFixedDataFailed() {
                     logger.loggerMessage("startGetAllCANDataList onStartToFilterOutFixedDataFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onStartToFilterOutFixedDataFailed"))
+
+
                 }
 
                 override fun onStartGetAllCANDataListFailed() {
                     logger.loggerMessage("startGetAllCANDataList onStartGetAllCANDataListFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onStartGetAllCANDataListFailed"))
+
                 }
 
                 override fun onStartGetAllCANDataListSuccess() {
                     logger.loggerMessage("startGetAllCANDataList onStartGetAllCANDataListSuccess")
+
 
                 }
 
@@ -1850,6 +1875,11 @@ class DeviceService(
                 override fun onStartReviewFailed() {
                     logger.loggerMessage("startGetAllCANDataList onStartReviewFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onStartReviewFailed"))
                 }
 
                 override fun onStopReviewSuccess() {
@@ -1865,15 +1895,33 @@ class DeviceService(
                 override fun onStopReviewFailed() {
                     logger.loggerMessage("startGetAllCANDataList onStopReviewFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onStopReviewFailed"))
+
                 }
 
                 override fun onGetCurBeFilterListSizeFailed() {
                     logger.loggerMessage("startGetAllCANDataList onGetCurBeFilterListSizeFailed")
 
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onGetCurBeFilterListSizeFailed"))
+
                 }
 
                 override fun onGetCurBeFilterListFailed() {
                     logger.loggerMessage("startGetAllCANDataList onGetCurBeFilterListFailed")
+
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    emitter.onError(RuntimeException("onGetCurBeFilterListFailed"))
 
                 }
 
