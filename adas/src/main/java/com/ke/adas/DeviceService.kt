@@ -2087,10 +2087,10 @@ class DeviceService(
 
                 logger.loggerMessage("获取到obd信号 $it")
                 if (!emitter.isDisposed) {
-                    if (it == Vispect_SDK_ARG.LIGHT_LEFT) {
-                        emitter.onNext(TurnSignal.Left)
-                    } else if (it == Vispect_SDK_ARG.LIGHT_RIGHT) {
-                        emitter.onNext(TurnSignal.Right)
+                    when (it) {
+                        Vispect_SDK_ARG.LIGHT_LEFT -> emitter.onNext(TurnSignal.Left)
+                        Vispect_SDK_ARG.LIGHT_RIGHT -> emitter.onNext(TurnSignal.Right)
+                        else -> emitter.onNext(TurnSignal.None)
                     }
                 }
 
