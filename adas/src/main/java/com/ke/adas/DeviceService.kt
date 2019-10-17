@@ -851,8 +851,8 @@ class DeviceService(
             logger.loggerMessage("开始设置报警灵敏度 $deviceSensitivityLevel")
             deviceHelper.setADASSensitivityLevel(
                 deviceSensitivityLevel.ldw,
-//                deviceSensitivityLevel.fcw
-                2
+                deviceSensitivityLevel.fcw
+//                2
                 ,
                 deviceSensitivityLevel.pcw,
                 object : SetDeviceInfoCallback {
@@ -891,7 +891,7 @@ class DeviceService(
                         return
                     }
                     logger.loggerMessage("获取报警灵敏度成功")
-                    it.onNext(DeviceSensitivityLevel(p0, 2, p2))
+                    it.onNext(DeviceSensitivityLevel(p0, p1, p2))
                     it.onComplete()
                 }
 
