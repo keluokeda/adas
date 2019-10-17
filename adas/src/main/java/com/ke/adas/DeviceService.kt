@@ -2154,6 +2154,84 @@ class DeviceService(
 
     }
 
+    /**
+     * 获取压缩等级
+     */
+    fun getCondenseLevel(): Observable<CondenseLevel> {
+        return Observable.create { emitter ->
+            deviceHelper.getDVRConfiguration(object : onGetDVRConfigurationCallback {
+                override fun onSuccess(
+                    p0: Boolean,
+                    p1: Int,
+                    p2: Boolean,
+                    p3: Boolean,
+                    p4: Boolean,
+                    p5: Boolean
+                ) {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+
+                    val condenseLevel = when (p1) {
+                        1 -> CondenseLevel.ExtraLow
+                        2 -> CondenseLevel.Low
+                        3 -> CondenseLevel.Middle
+                        4 -> CondenseLevel.Hight
+                        else -> CondenseLevel.Hight
+                    }
+
+                    emitter.onNext(condenseLevel)
+                    emitter.onComplete()
+                }
+
+                override fun onFail(p0: Int) {
+                    if (emitter.isDisposed) {
+                        return
+                    }
+                    emitter.onError(DeviceException(p0))
+                }
+
+            })
+        }
+    }
+
+    /**
+     * 设置压缩等级
+     */
+    fun setCondenseLevel(condenseLevel: CondenseLevel): Observable<Boolean> {
+        return Observable.create { emitter ->
+
+            logger.loggerMessage("开始设置压缩等级 $condenseLevel")
+
+            deviceHelper.DVRConfiguration(
+                false,
+                condenseLevel.level,
+                0,
+                0,
+                0,
+                0,
+                object : SetDeviceInfoCallback {
+                    override fun onSuccess() {
+                        if (emitter.isDisposed) {
+                            return
+                        }
+                        emitter.onNext(true)
+                        emitter.onComplete()
+
+                    }
+
+                    override fun onFail(p0: Int) {
+                        if (emitter.isDisposed) {
+                            return
+                        }
+                        emitter.onNext(false)
+                        emitter.onComplete()
+                    }
+                })
+
+        }
+    }
+
     private fun createProgressCallback(observableEmitter: ObservableEmitter<Int>): ProgressCallback {
 
         return object : ProgressCallback {
@@ -2216,6 +2294,12 @@ class DeviceService(
 
             }
         }
+    }
+
+
+    private fun test() {
+
+//        deviceHelper.DVRConfiguration()
     }
 
 
