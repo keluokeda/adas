@@ -14,7 +14,9 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
+import com.ke.adas.entity.CondenseLevel
 import com.ke.adas.entity.RealViewEntity
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -133,6 +135,25 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 handleError(it)
             }
         ).addTo(compositeDisposable)
+
+
+        getDeviceService()
+            .getCondenseLevel()
+            .flatMap { level ->
+                if (level != CondenseLevel.ExtraHeight) {
+                    return@flatMap getDeviceService().setCondenseLevel(CondenseLevel.ExtraHeight)
+                } else {
+                    return@flatMap Observable.just(false)
+                }
+
+
+            }
+            .subscribe({
+
+            }, {
+                handleError(it)
+            })
+            .addTo(compositeDisposable)
     }
 
 
@@ -201,9 +222,10 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun updateSpeed() {
-        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe {
-            tv_speed.text = it
-        }.addTo(compositeDisposable)
+        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                tv_speed.text = it
+            }.addTo(compositeDisposable)
     }
 
     private fun addWifiConnectedListener() {
@@ -241,7 +263,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     private fun hideNavigation() {
         val params = window.attributes
-        params.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE
+        params.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE
         window.attributes = params
 
     }
