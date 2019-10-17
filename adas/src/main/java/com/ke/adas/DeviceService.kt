@@ -2176,8 +2176,9 @@ class DeviceService(
                         1 -> CondenseLevel.ExtraLow
                         2 -> CondenseLevel.Low
                         3 -> CondenseLevel.Middle
-                        4 -> CondenseLevel.Hight
-                        else -> CondenseLevel.Hight
+                        4 -> CondenseLevel.Height
+                        5 -> CondenseLevel.ExtraHeight
+                        else -> CondenseLevel.Middle
                     }
 
                     emitter.onNext(condenseLevel)
