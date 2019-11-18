@@ -354,9 +354,11 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        compositeDisposable.dispose()
 
         unregisterReceiver(receiver)
+
+        compositeDisposable.dispose()
+
     }
 
 

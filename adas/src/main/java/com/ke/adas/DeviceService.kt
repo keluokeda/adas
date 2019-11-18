@@ -358,12 +358,12 @@ class DeviceService(
     fun openDeviceRealViewMode(): Observable<Pair<String, String>> {
         return Observable.create<Pair<String, String>> {
             logger.loggerMessage("打开设备实况模式")
-            deviceHelper.openDeviceRealViewMode(getOnWifiOpenListener(it))
+            deviceHelper.openDeviceCalibrationMode(getOnWifiOpenListener(it))
         }
 
             .doOnDispose {
                 logger.loggerMessage("关闭设备实况模式")
-                deviceHelper.closeDeviceRealViewMode()
+                deviceHelper.closeDeviceCalibrationMode()
             }
     }
 
@@ -371,7 +371,7 @@ class DeviceService(
      * 关闭实况模式
      */
     fun closeDeviceRealViewMode() {
-        deviceHelper.closeDeviceRealViewMode()
+        deviceHelper.closeDeviceCalibrationMode()
     }
 
 
@@ -397,7 +397,7 @@ class DeviceService(
 
         return Observable.create<Boolean> {
             logger.loggerMessage("开始实况模式")
-            deviceHelper.startRealView()
+            deviceHelper.startCalibration()
             it.onNext(true)
             //调用了onComplete 就不会走doOnDispose
 //            it.onComplete()
@@ -405,7 +405,8 @@ class DeviceService(
 
             .doOnDispose {
                 logger.loggerMessage("关闭实况模式")
-                deviceHelper.stopRealView()
+//                deviceHelper.stopRealView()
+                deviceHelper.stopCalibration()
             }
 
     }
