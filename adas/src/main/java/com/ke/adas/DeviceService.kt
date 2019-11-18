@@ -386,7 +386,7 @@ class DeviceService(
             )
         }.doOnDispose {
             logger.loggerMessage("注销实况模式")
-            deviceHelper.initRealView(null)
+            deviceHelper.initCalibration(null)
         }
     }
 
