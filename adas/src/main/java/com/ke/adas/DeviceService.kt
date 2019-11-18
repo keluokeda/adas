@@ -381,7 +381,7 @@ class DeviceService(
     fun initRealView(): Observable<RealViewEntity> {
         return Observable.create<RealViewEntity> {
             logger.loggerMessage("初始化实况模式")
-            deviceHelper.initRealView(
+            deviceHelper.initCalibration(
                 getRealViewCallback(it)
             )
         }.doOnDispose {
