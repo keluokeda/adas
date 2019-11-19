@@ -283,6 +283,12 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                         video_surface_view.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
+
+
+                        if (BuildConfig.DEBUG) {
+                            tv_sensor.text =
+                                "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
+                        }
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
                     RealViewEntity.TYPE_SPEED -> {
