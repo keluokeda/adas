@@ -287,13 +287,14 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
                         if (BuildConfig.DEBUG) {
 
-                            Observable.just(1)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    tv_sensor.text =
-                                        "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
-                                }
+//                            Observable.just(1)
+//                                .observeOn(AndroidSchedulers.mainThread())
+//                                .subscribe {
+//                                    tv_sensor.text =
+//                                        "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
+//                                }
 
+                            loggerMessage("x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}")
                         }
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
