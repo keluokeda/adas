@@ -42,6 +42,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     private val speedSubject = PublishSubject.create<String>()
 
+    private val sensorSubject = PublishSubject.create<Float>()
+
     private val deviceWifiDisconnectedSubject = PublishSubject.create<Boolean>()
 
     private var isDeviceWifiConnected = false
@@ -116,6 +118,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
         updateSpeed()
 
+
+        updateSensorLine()
+
         initViewListener()
 
         val intentFilter = IntentFilter()
@@ -154,6 +159,14 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 handleError(it)
             })
             .addTo(compositeDisposable)
+    }
+
+    private fun updateSensorLine() {
+        sensorSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                horizontal_line.rotation = it
+
+            }.addTo(compositeDisposable)
     }
 
 
@@ -284,18 +297,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
 
+                        sensorSubject.onNext(realViewEntity.x * -9f)
 
-                        if (BuildConfig.DEBUG) {
 
-//                            Observable.just(1)
-//                                .observeOn(AndroidSchedulers.mainThread())
-//                                .subscribe {
-//                                    tv_sensor.text =
-//                                        "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
-//                                }
-
-                            loggerMessage("x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}")
-                        }
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
                     RealViewEntity.TYPE_SPEED -> {
