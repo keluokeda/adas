@@ -286,8 +286,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
                         if (BuildConfig.DEBUG) {
-                            tv_sensor.text =
-                                "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
+                            runOnUiThread {
+                                tv_sensor.text =
+
+                                    "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
+
+                            }
+
                         }
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
