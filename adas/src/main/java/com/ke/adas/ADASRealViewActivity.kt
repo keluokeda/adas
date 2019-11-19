@@ -286,12 +286,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
 
                         if (BuildConfig.DEBUG) {
-                            runOnUiThread {
-                                tv_sensor.text =
 
-                                    "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
-
-                            }
+                            Observable.just(1)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    tv_sensor.text =
+                                        "x = ${realViewEntity.x}, y = ${realViewEntity.y},z = ${realViewEntity.z}"
+                                }
 
                         }
                     }
