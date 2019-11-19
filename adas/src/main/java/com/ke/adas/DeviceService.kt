@@ -325,6 +325,8 @@ class DeviceService(
 
 
             override fun onGetSensorData(x: Float, y: Float, z: Float) {
+                logger.loggerMessage("x = ${x}, y = ${y},z = ${z}")
+
                 e.onNext(RealViewEntity(x, y, z))
             }
 
