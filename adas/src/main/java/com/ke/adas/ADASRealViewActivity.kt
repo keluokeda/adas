@@ -162,7 +162,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun updateSensorLine() {
-        sensorSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+        sensorSubject.throttleFirst(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 horizontal_line.rotation = it
 
@@ -235,7 +235,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun updateSpeed() {
-        speedSubject.debounce(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+        speedSubject.throttleFirst(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 tv_speed.text = it
             }.addTo(compositeDisposable)
