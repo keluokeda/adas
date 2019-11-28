@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
@@ -14,8 +15,10 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
+import bean.DrawShape
 import com.ke.adas.entity.CondenseLevel
 import com.ke.adas.entity.RealViewEntity
+import com.ke.adas.widget.ADASSurfaceView
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -27,6 +30,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_adasreal_view.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.sin
 
 abstract class ADASRealViewActivity : AppCompatActivity() {
 
@@ -287,6 +291,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     }
 
+    private var drawShapeList: MutableList<DrawShape> = mutableListOf()
+
     private fun initRealView() {
         getDeviceService()
             .initRealView()
@@ -301,12 +307,41 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                         video_surface_view.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
+                        val x = realViewEntity.x
+                        val y = realViewEntity.y
 
-                        sensorSubject.onNext(realViewEntity.x * -9f)
+                        val isNewSensor = x <= y
+
+                        val degreeX = if (isNewSensor) ADASSurfaceView.todegree(
+                            y,
+                            x
+                        ) else ADASSurfaceView.todegree(x, y)
+
+                        val lasty =
+                            ((640 / sin((90 - degreeX) * Math.PI / 180)) * sin(degreeX * Math.PI / 180))
+
+
+                        val sensorShape = DrawShape()
+                        sensorShape.color = Color.RED
+                        sensorShape.type = 3
+                        sensorShape.isDashed = false
+                        sensorShape.x0 = 0f
+                        sensorShape.y0 = (360 - lasty).toFloat()
+                        sensorShape.y0 = 1280f
+                        sensorShape.y1 = (360 + lasty).toFloat()
+
+                        drawShapeList.add(sensorShape)
+
+                        adas_surface_view.setDrawList(drawShapeList)
+
+//                        sensorSubject.onNext(realViewEntity.x * -9f)
 
 
                     }
-                    RealViewEntity.TYPE_ADAS_INFO -> adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
+                    RealViewEntity.TYPE_ADAS_INFO -> {
+                        drawShapeList = realViewEntity.mDrawShapes
+                        adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
+                    }
                     RealViewEntity.TYPE_SPEED -> {
                         //需要在主线程更新
 //                        tv_speed.text = realViewEntity.speed
@@ -328,6 +363,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             })
             .addTo(compositeDisposable)
     }
+
 
     override fun onBackPressed() {
         loggerMessage("点了返回按钮")

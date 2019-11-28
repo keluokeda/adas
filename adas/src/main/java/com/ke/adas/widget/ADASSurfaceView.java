@@ -6,8 +6,11 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
 import bean.DrawShape;
+
 import com.ke.adas.R;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -85,9 +88,6 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             mSubscriber.onNext(drawList);
         }
     }
-
-
-
 
 
     private void clear(Canvas canvas) {
@@ -205,6 +205,26 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 break;
         }
 
+    }
+
+    public static float todegree(float ax, float ay) {
+        double g = Math.sqrt(ax * ax + ay * ay);
+        double cos = ay / g;
+        if (cos > 1) {
+            cos = 1;
+        } else if (cos < -1) {
+            cos = -1;
+        }
+        double rad = Math.acos(cos);
+        if (ax < 0) {
+            rad = 2 * Math.PI - rad;
+        }
+        float degree = (float) (rad * 180 / Math.PI);
+        if (Float.isNaN(degree)) {
+            return 0;
+        } else {
+            return degree;
+        }
     }
 
 
