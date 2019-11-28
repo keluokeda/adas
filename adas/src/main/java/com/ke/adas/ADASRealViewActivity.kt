@@ -167,6 +167,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 horizontal_line.rotation = it
                 horizontal_line.invalidate()
 
+
             }.addTo(compositeDisposable)
     }
 
