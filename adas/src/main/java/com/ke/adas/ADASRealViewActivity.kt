@@ -165,6 +165,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         sensorSubject.throttleFirst(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 horizontal_line.rotation = it
+                horizontal_line.invalidate()
 
             }.addTo(compositeDisposable)
     }
