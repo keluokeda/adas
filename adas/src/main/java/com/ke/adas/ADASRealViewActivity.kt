@@ -302,7 +302,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
 
-                        sensorSubject.onNext(realViewEntity.x * -9f)
+//                        sensorSubject.onNext(realViewEntity.x * -9f)
 
 
                     }
