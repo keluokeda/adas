@@ -327,7 +327,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                         sensorShape.isDashed = false
                         sensorShape.x0 = 0f
                         sensorShape.y0 = (360 - lasty).toFloat()
-                        sensorShape.y0 = 1280f
+                        sensorShape.x1 = 1280f
                         sensorShape.y1 = (360 + lasty).toFloat()
 
                         drawShapeList.add(sensorShape)
