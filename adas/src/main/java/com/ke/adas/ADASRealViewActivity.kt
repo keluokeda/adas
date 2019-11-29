@@ -293,6 +293,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
     private var drawShapeList: MutableList<DrawShape> = mutableListOf()
 
+    val sensorShape = DrawShape()
+
+
     private fun initRealView() {
         getDeviceService()
             .initRealView()
@@ -321,7 +324,6 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                             ((640 / sin((90 - degreeX) * Math.PI / 180)) * sin(degreeX * Math.PI / 180))
 
 
-                        val sensorShape = DrawShape()
                         sensorShape.color = Color.RED
                         sensorShape.type = 3
                         sensorShape.isDashed = false
