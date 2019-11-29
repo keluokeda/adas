@@ -191,7 +191,7 @@ public class ADASSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             case SLINE:
 
                 paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(50);
+                paint.setStrokeWidth(3);
                 paint.setAntiAlias(true);//去除锯齿
                 paint.setFilterBitmap(true);//对位图进行滤波处理
                 paint.setColor(color);
