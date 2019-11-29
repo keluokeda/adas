@@ -340,7 +340,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                     }
                     RealViewEntity.TYPE_ADAS_INFO -> {
                         drawShapeList = realViewEntity.mDrawShapes
-                        adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
+//                        adas_surface_view.setDrawList(realViewEntity.mDrawShapes)
                     }
                     RealViewEntity.TYPE_SPEED -> {
                         //需要在主线程更新
