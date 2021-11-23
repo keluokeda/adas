@@ -1,6 +1,6 @@
 package com.ke.adas.entity
 
-import android.support.annotation.IntRange
+import androidx.annotation.IntRange
 
 data class AlarmConfiguration(
     /**

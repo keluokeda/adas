@@ -9,13 +9,14 @@ import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import bean.DrawShape
+import com.ke.adas.databinding.KeAdasActivityAdasrealViewBinding
 import com.ke.adas.entity.CondenseLevel
 import com.ke.adas.entity.RealViewEntity
 import com.ke.adas.widget.ADASSurfaceView
@@ -28,7 +29,6 @@ import io.reactivex.functions.Consumer
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import kotlinx.android.synthetic.main.activity_adasreal_view.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.sin
 
@@ -61,7 +61,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
 
-            val netWorkInfo: NetworkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)
+            val netWorkInfo: NetworkInfo =
+                intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO) ?: return
 
             loggerMessage("wifi状态发生变化")
 
@@ -98,11 +99,15 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var binding: KeAdasActivityAdasrealViewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestFullScreen()
-        setContentView(R.layout.activity_adasreal_view)
+
+        binding = KeAdasActivityAdasrealViewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
 
@@ -111,7 +116,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             finish()
         }
 
-        progress_container.visibility = View.VISIBLE
+        binding.progressContainer.visibility = View.VISIBLE
 
 
         addWifiConnectedListener()
@@ -172,7 +177,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 //                horizontal_line.rotation = it
 //                horizontal_line.invalidate()
 
-                horizontal_line.animate().rotation(it).setDuration(100).start()
+                binding.horizontalLine.animate().rotation(it).setDuration(100).start()
 
             }.addTo(compositeDisposable)
     }
@@ -231,13 +236,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
     }
 
     private fun initViewListener() {
-        connect.setOnClickListener {
+        binding.connect.setOnClickListener {
 
             //跳转到wifi设置界面
             startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
         }
 
-        back.setOnClickListener {
+        binding.back.setOnClickListener {
             finish()
         }
     }
@@ -246,7 +251,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
         speedSubject.throttleFirst(500, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                tv_speed.text = it
+                binding.tvSpeed.text = it
             }.addTo(compositeDisposable)
     }
 
@@ -269,10 +274,10 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    progress_container.visibility = View.GONE
-                    layout_connect.visibility = View.VISIBLE
-                    wifi_name.text = it.first
-                    wifi_password.text = it.second
+                    binding.progressContainer.visibility = View.GONE
+                    binding.layoutConnect.visibility = View.VISIBLE
+                    binding.wifiName.text = it.first
+                    binding.wifiPassword.text = it.second
                     this.wifiName = it.first
 
                 }, {
@@ -307,7 +312,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
                 when (realViewEntity.type) {
                     RealViewEntity.TYPE_FRAME -> {
                         //                        mBooleanSingleEmitter.onSuccess(java.lang.Boolean.TRUE)
-                        video_surface_view.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
+                        binding.videoSurfaceView.setOnePixData(realViewEntity.mBytes, realViewEntity.size)
                     }
                     RealViewEntity.TYPE_ADAS_SENSOR -> {
                         val x = realViewEntity.x
@@ -334,7 +339,7 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
 
                         drawShapeList.add(sensorShape)
 
-                        adas_surface_view.setDrawList(drawShapeList)
+                        binding.adasSurfaceView.setDrawList(drawShapeList)
 
 //                        sensorSubject.onNext(realViewEntity.x * -9f)
 
@@ -376,8 +381,8 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
      * 开启实况模式
      */
     private fun startRealView() {
-        layout_connect.visibility = View.GONE
-        progress_container.visibility = View.VISIBLE
+        binding.layoutConnect.visibility = View.GONE
+        binding.progressContainer.visibility = View.VISIBLE
 
         getDeviceService().startRealView()
             .subscribeOn(Schedulers.io())
@@ -385,9 +390,9 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 //开启实况模式成功后 取消连接wifi提示框
-                layout_connect.visibility = View.GONE
-                progress_container.visibility = View.VISIBLE
-                divider.visibility = View.VISIBLE
+                binding.layoutConnect.visibility = View.GONE
+                binding.progressContainer.visibility = View.VISIBLE
+                binding.divider.visibility = View.VISIBLE
 
                 loggerMessage(
                     "开启实况模式结果 $it"
@@ -399,13 +404,13 @@ abstract class ADASRealViewActivity : AppCompatActivity() {
             })
             .addTo(compositeDisposable)
 
-        video_surface_view
+        binding.videoSurfaceView
             .initSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 //收到第一帧后 隐藏进度条
-                progress_container.visibility = View.GONE
-                divider.visibility = View.VISIBLE
+                binding.progressContainer.visibility = View.GONE
+                binding.divider.visibility = View.VISIBLE
             }, {
                 handleError(it)
             }).addTo(compositeDisposable)

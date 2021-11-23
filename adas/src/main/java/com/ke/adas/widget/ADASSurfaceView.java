@@ -2,7 +2,7 @@ package com.ke.adas.widget;
 
 import android.content.Context;
 import android.graphics.*;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;

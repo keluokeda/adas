@@ -3,7 +3,7 @@ package com.ke.adas.widget;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.support.v4.util.Pair;
+import androidx.core.util.Pair;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
