@@ -32,6 +32,8 @@ class App : Application() {
             Logger.d(it)
         }
 
+
+
         initDeviceService()
 
     }
